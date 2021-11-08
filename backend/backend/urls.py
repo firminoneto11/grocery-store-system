@@ -14,16 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
+from rest_framework_simplejwt.views import TokenRefreshView as Refresh
+from utils import Tokens 
 
 
 urlpatterns = [
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/v1/', include('users.urls')),
-    path('api/v1/', include('products.urls')),
-    path('api/v1/', include('sales.urls')),
+    path(route='api/v1/token/', view=Tokens.as_view(), name='token'),
+    path(route='api/v1/refresh/', view=Refresh.as_view(), name='refresh'),
+    path(route='api/v1/', view=include('users.urls')),
+    path(route='api/v1/', view=include('products.urls')),
+    path(route='api/v1/', view=include('sales.urls')),
 ]
 
 # from django.contrib import admin
 # path('admin/', admin.site.urls),
+
+# from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
+# path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+# path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

@@ -1,4 +1,6 @@
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as TS
+from rest_framework_simplejwt.views import TokenObtainPairView as TOPV
 
 
 class Gen(GenericViewSet):
@@ -27,3 +29,27 @@ class Gen(GenericViewSet):
             return None
         else:
             return element
+
+
+class TokenSerializer(TS):
+    """
+    This class is responsible for serializing the user data into a JSON Web token.
+    """
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['first_name'] = user.first_name
+        token['last_name'] = user.last_name
+        token['email'] = user.email
+        token['created_at'] = str(user.created_at)
+        token['last_login'] = str(user.last_login)
+        token['is_active'] = user.is_active
+        # ...
+
+        return token
+
+
+class Tokens(TOPV):
+    serializer_class = TokenSerializer
