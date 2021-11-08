@@ -7,7 +7,7 @@ urlpatterns = [
     # Users without route params
     path(route='users/', view=UsersView.as_view({
         'get': 'list',
-        'post': 'create',
+        # 'post': 'create',
     }), name='users'),
 
     # Users with route params

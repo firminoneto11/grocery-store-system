@@ -3,4 +3,6 @@ from utils import Gen
 
 
 class UsersView(Gen):
-    pass
+
+    def list(self, request):
+        return Response(data={"Authenticated": "If you can see this, then you're authenticated!"})
