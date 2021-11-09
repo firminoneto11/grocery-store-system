@@ -4,7 +4,10 @@ from .models import Users
 
 
 class UsersSerializer(ModelSerializer):
-    # There are automatic validations for email, password, first name and last name
+    """
+    This class is responsible for serializing and deserializing Users objects into JSON and vice versa. It also apply some custom
+    checks and validations.
+    """
 
     class Meta:
         model = Users
@@ -18,18 +21,20 @@ class UsersSerializer(ModelSerializer):
             "password": {"write_only": True},
         }
 
-    # def create(self, validated_data):
-    #     validated_data['password'] = make_password(validated_data['password'])
-    #     return super(UsersSerializer, self).create(validated_data)
+    def create(self, validated_data):
+        """
+        This method is responsible for encrypting the user's password before inserting it in the database.
+        """
+        validated_data['password'] = make_password(validated_data['password'])
+        return super(UsersSerializer, self).create(validated_data)
 
-    def validate_is_active(self, value):
-        if isinstance(value, bool):
-            return value
-        raise ValidationError("'is_active' must be a boolean value.")
+    def update(self, instance, validated_data):
+        """
+        This method is responsible for encrypting the user's password before a update in the password field.
+        """
+        if validated_data.get('password') is not None:
+            validated_data['password'] = make_password(validated_data['password'])
+        return super(UsersSerializer, self).update(instance, validated_data)
 
     def validate_last_login(self, value):
         pass
-
-
-# is_superuser -> Can not be set
-# is_staff -> Can not be set

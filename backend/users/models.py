@@ -38,14 +38,22 @@ class Users(AbstractUser):
 
     # Our custom attributes for Users
     email = models.EmailField(unique=True, null=False, blank=False, error_messages={
-        'unique': "A user with that email already exists."
+        "unique": "A user with that email already exists."
         })
-
-    first_name = models.CharField(null=False, blank=False, max_length=50)
-    last_name = models.CharField(null=False, blank=False, max_length=50)
+    first_name = models.CharField(null=False, blank=False, max_length=50, error_messages={
+        "first_name": "first_name must be set."
+    })
+    last_name = models.CharField(null=False, blank=False, max_length=50, error_messages={
+        "last_name": "last_name must be set."
+    })
 
     # Other attributes
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, blank=False, null=False, error_messages={
+        "is_active": "is_active must be set with a valid boolean value."
+    })
+    last_login = models.DateTimeField(blank=True, null=True, error_messages={
+        "last_login": "last_login must be a valid datetime value."
+    })
     created_at = models.DateTimeField(default=timezone.now)
 
     # Overriding some attributes, because they are no longer needed
@@ -64,6 +72,3 @@ class Users(AbstractUser):
     class Meta:
         db_table = "USERS"
         ordering = ("id", )
-
-
-# We must inherit from 'AbstractUser' class in order to create our custom user model.

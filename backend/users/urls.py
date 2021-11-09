@@ -13,7 +13,6 @@ urlpatterns = [
     # Users with route params
     path(route='users/<int:pk>/', view=UsersView.as_view({
         'get': 'retrieve',
-        'put': 'update',
         'patch': 'update',
         'delete': 'destroy',
     }), name='users')
