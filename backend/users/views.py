@@ -20,5 +20,7 @@ class UsersView(Gen):
     def create(self, request):
         new_user = self.get_serializer(data=request.data)
         new_user.is_valid(raise_exception=True)
+        # new_user.save()
+        new_user = Users(**new_user.data)
         new_user.save()
-        return Response(data=new_user.data)
+        return Response(data={"success": request.data})

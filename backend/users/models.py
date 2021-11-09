@@ -12,7 +12,7 @@ class UsersManager(BaseUserManager):
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
-        user = self.model(email=email, username=email, **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -48,8 +48,9 @@ class Users(AbstractUser):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
 
-    # Overriding some attributes, because they were replaced before
+    # Overriding some attributes, because they are no longer needed
     date_joined = None
+    username = None
 
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
