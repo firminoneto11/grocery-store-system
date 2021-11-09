@@ -20,7 +20,7 @@ from utils import Tokens
 
 urlpatterns = [
     path(route='api/v1/token/', view=Tokens.as_view(), name='token'),
-    path(route='api/v1/refresh/', view=Refresh.as_view(), name='refresh'),
+    path(route='api/v1/token/refresh', view=Refresh.as_view(), name='token_refresh'),
     path(route='api/v1/', view=include('users.urls')),
     path(route='api/v1/', view=include('products.urls')),
     path(route='api/v1/', view=include('sales.urls')),

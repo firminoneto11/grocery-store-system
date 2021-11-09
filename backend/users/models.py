@@ -62,6 +62,7 @@ class Users(AbstractUser):
 
     class Meta:
         db_table = "USERS"
+        ordering = ("id", )
 
 
 # We must inherit from 'AbstractUser' class in order to create our custom user model.
