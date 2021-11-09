@@ -11,7 +11,7 @@ urlpatterns = [
     }), name='users'),
 
     # Users with route params
-    path(route='users/<int:pk>', view=UsersView.as_view({
+    path(route='users/<int:pk>/', view=UsersView.as_view({
         'get': 'retrieve',
         'put': 'update',
         'patch': 'update',

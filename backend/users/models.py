@@ -38,7 +38,7 @@ class Users(AbstractUser):
 
     # Our custom attributes for Users
     email = models.EmailField(unique=True, null=False, blank=False, error_messages={
-        'unique': ("A user with that email already exists.", )
+        'unique': "A user with that email already exists."
         })
 
     first_name = models.CharField(null=False, blank=False, max_length=50)
