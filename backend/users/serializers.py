@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, ValidationError
+from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.hashers import make_password
 from .models import Users
 
@@ -17,6 +17,7 @@ class UsersSerializer(ModelSerializer):
         extra_kwargs = {
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "last_login": {"read_only": True},
             "email": {"write_only": True},
             "password": {"write_only": True},
         }
@@ -35,6 +36,3 @@ class UsersSerializer(ModelSerializer):
         if validated_data.get('password') is not None:
             validated_data['password'] = make_password(validated_data['password'])
         return super(UsersSerializer, self).update(instance, validated_data)
-
-    def validate_last_login(self, value):
-        pass

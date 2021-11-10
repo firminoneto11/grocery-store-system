@@ -4,13 +4,13 @@ from .views import ProductsView
 
 urlpatterns = [
 
-    # Users without route params
+    # Products without route params
     path(route='products/', view=ProductsView.as_view({
         'get': 'list',
         'post': 'create',
     }), name='users'),
 
-    # Users with route params
+    # Products with route params
     path(route='products/<int:pk>', view=ProductsView.as_view({
         'get': 'retrieve',
         'patch': 'update',

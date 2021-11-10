@@ -8,7 +8,7 @@ class Products(models.Model):
 
     is_active = models.BooleanField(default=True, null=False, blank=False)
     amount_in_stock = models.IntegerField(null=False, blank=False, default=0)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True, default="")
 
     name = models.CharField(unique=True, null=False, blank=False, max_length=100, error_messages={
         "unique": "A product with the given name already exists in the database."
