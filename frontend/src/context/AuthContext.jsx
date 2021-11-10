@@ -1,7 +1,6 @@
 
 import { createContext } from "react";
 import { useState } from "react";
-import { useEffect } from "react";
 import { useHistory } from "react-router";
 import jwtDecode from "jwt-decode";
 
@@ -20,25 +19,41 @@ const getUser = () => {
     return null;
 }
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
 
     const [tokens, setTokens] = useState(() => getAccessToken());
     const [user, setUser] = useState(() => getUser());
+    const history = useHistory();
 
-    const logIn = async () => {
+    const logIn = async (event) => {
+        event.preventDefault();
+        const userData = { email: event.target.email.value, password: event.target.password.value }
 
+        const response = await fetch("http://localhost:8000/api/v1/token/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData)
+        })
+
+        const data = await response.json();
+
+        if (response.status === 200) {
+            setTokens(data);
+            setUser(jwtDecode(data.access));
+            localStorage.setItem("tokens", JSON.stringify(data));
+            history.push("/home");
+        }
+        else {
+            alert(`Email: ${data.email}\nPassword: ${data.password}`);
+        }
     }
 
     const logOut = () => {
         setTokens(null);
         setUser(null);
         localStorage.removeItem("tokens");
-        useHistory.push("/login");
+        history.push("/login");
     }
-
-    useEffect(() => {
-
-    }, [tokens, user]);
 
     const contextData = { user, tokens, logIn, logOut }
 
