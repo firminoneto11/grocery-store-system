@@ -1,9 +1,10 @@
-import { Fragment } from "react";
+
+import { AuthProvider } from "./context/AuthContext";
 
 export default function App() {
 	return (
-		<Fragment>
+		<AuthProvider>
 			<p>Hello world!</p>
-		</Fragment>
+		</AuthProvider>
 	);
 }
