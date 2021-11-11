@@ -8,7 +8,7 @@ import jwtDecode from "jwt-decode";
 const AuthContext = createContext();
 export default AuthContext;
 
-const getAccessToken = () => {
+const getTokens = () => {
     const tokens = localStorage.getItem("tokens");
     if (tokens) {
         try {
@@ -24,7 +24,7 @@ const getAccessToken = () => {
 }
 
 const getUser = () => {
-    const tokens = getAccessToken();
+    const tokens = getTokens();
     if (tokens) {
         try {
             return jwtDecode(JSON.stringify(tokens));
@@ -39,12 +39,12 @@ const getUser = () => {
 }
 
 const checkLogged = () => {
-    return getAccessToken() ? true : false;
+    return getTokens() ? true : false;
 }
 
 export const AuthProvider = ({ children }) => {
 
-    const [tokens, setTokens] = useState(() => getAccessToken());
+    const [tokens, setTokens] = useState(() => getTokens());
     const [user, setUser] = useState(() => getUser());
     const [isLogged, setIsLogged] = useState(() => checkLogged());
     const history = useHistory();
