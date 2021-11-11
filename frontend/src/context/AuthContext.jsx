@@ -1,6 +1,7 @@
 
 import { createContext } from "react";
 import { useState } from "react";
+import { useEffect } from "react";
 import { useHistory } from "react-router";
 import jwtDecode from "jwt-decode";
 
@@ -9,20 +10,43 @@ export default AuthContext;
 
 const getAccessToken = () => {
     const tokens = localStorage.getItem("tokens");
-    if (tokens) return JSON.parse(tokens);
-    return null;
+    if (tokens) {
+        try {
+            return JSON.parse(tokens);
+        }
+        catch(error) {
+            return null;
+        }
+    }
+    else {
+        return null;
+    }
 }
 
 const getUser = () => {
     const tokens = getAccessToken();
-    if (tokens) return jwtDecode(JSON.stringify(tokens));
-    return null;
+    if (tokens) {
+        try {
+            return jwtDecode(JSON.stringify(tokens));
+        }
+        catch(error) {
+            return null;
+        }
+    }
+    else {
+        return null;
+    }
+}
+
+const checkLogged = () => {
+    return getAccessToken() ? true : false;
 }
 
 export const AuthProvider = ({ children }) => {
 
     const [tokens, setTokens] = useState(() => getAccessToken());
     const [user, setUser] = useState(() => getUser());
+    const [isLogged, setIsLogged] = useState(() => checkLogged());
     const history = useHistory();
 
     const logIn = async (event) => {
@@ -35,27 +59,94 @@ export const AuthProvider = ({ children }) => {
             body: JSON.stringify(userData)
         })
 
-        const data = await response.json();
+        const returnedTokens = await response.json();
 
         if (response.status === 200) {
-            setTokens(data);
-            setUser(jwtDecode(data.access));
-            localStorage.setItem("tokens", JSON.stringify(data));
-            history.push("/home");
+            const returnedUser = jwtDecode(returnedTokens.access);
+            setTokens(returnedTokens);
+            setUser(returnedUser);
+            setIsLogged(true);
+            localStorage.setItem("tokens", JSON.stringify(returnedTokens));
+            history.push("/");
         }
         else {
-            alert(`Email: ${data.email}\nPassword: ${data.password}`);
+            alert(`Email: ${returnedTokens.email}\nPassword: ${returnedTokens.password}`);
         }
     }
 
     const logOut = () => {
         setTokens(null);
         setUser(null);
+        setIsLogged(false);
         localStorage.removeItem("tokens");
         history.push("/login");
     }
 
-    const contextData = { user, tokens, logIn, logOut }
+    const updateTokens = async () => {
+        let refreshToken;
+        try {
+            refreshToken = JSON.stringify(tokens.refresh);
+            jwtDecode(refreshToken);
+        }
+        catch(error) {
+            console.log(error.message);
+            return logOut();
+        }
+        const response = await fetch("http://localhost:8000/api/v1/token/refresh/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json"},
+            body: refreshToken
+        })
+
+        const returnedTokens = await response.json();
+
+        if (response.status === 200) {
+            const returnedUser = jwtDecode(returnedTokens.access);
+            setTokens(returnedTokens);
+            setUser(returnedUser);
+            setIsLogged(true);
+            localStorage.setItem("tokens", JSON.stringify(returnedTokens));
+        }
+        else {
+            logOut();
+        }
+    }
+
+    const accessTokenIsValid = () => {
+        
+        if (user) {
+            const expiresAt = new Date(user.exp * 1000);
+            const curDate = new Date();
+            if (curDate >= expiresAt - 86400) {
+                return false;
+            }
+            else if (curDate >= expiresAt) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    useEffect(() => {
+        if (isLogged) {
+            if (accessTokenIsValid()) {
+                const seconds = num => num * 1000
+                const interval = setInterval(() => {
+                    console.log("Checking if the token is valid!");
+                    if (!accessTokenIsValid()) {
+                        updateTokens();
+                    }
+                }, seconds(5));
+                return () => clearInterval(interval);
+            }
+            else {
+                updateTokens();
+            }
+        }
+    }, [isLogged]);
+
+    const contextData = { user, tokens, isLogged, logIn, logOut };
 
     return (
         <AuthContext.Provider value={contextData}>

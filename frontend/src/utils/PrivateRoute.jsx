@@ -4,12 +4,12 @@ import { Fragment, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
 export default function PrivateRoute({ ...args }) {
-    const { user } = useContext(AuthContext);
+    const { isLogged } = useContext(AuthContext);
 
     return (
         <Fragment>
-            {user && <Route {...args} />}
-            {!user && <Redirect to="/login" />}
+            {isLogged && <Route {...args} />}
+            {!isLogged && <Redirect to="/login" />}
         </Fragment>
     );
 };

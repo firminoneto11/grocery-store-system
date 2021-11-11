@@ -9,7 +9,7 @@ export default function App() {
     return (
         <Router>
             <AuthProvider>
-                <PrivateRoute component={HomePage} path="/home" exact />
+                <PrivateRoute component={HomePage} path="/" exact />
                 <Route component={LoginPage} path="/login" exact />
             </AuthProvider>
         </Router>
