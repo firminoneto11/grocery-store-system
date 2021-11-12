@@ -52,12 +52,12 @@ export const AuthProvider = ({ children }) => {
         let response;
         try {
             response = await fetch("http://localhost:8000/api/v1/token/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userData)
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData)
             });
         }
-        catch(error) {
+        catch (error) {
             alert('Could not get a response from the server.');
             return;
         }
