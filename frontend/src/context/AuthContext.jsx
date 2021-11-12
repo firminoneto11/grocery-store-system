@@ -14,7 +14,7 @@ const getTokens = () => {
         try {
             return JSON.parse(tokens);
         }
-        catch(error) {
+        catch (error) {
             return null;
         }
     }
@@ -29,7 +29,7 @@ const getUser = () => {
         try {
             return jwtDecode(JSON.stringify(tokens));
         }
-        catch(error) {
+        catch (error) {
             return null;
         }
     }
@@ -38,15 +38,11 @@ const getUser = () => {
     }
 }
 
-const checkLogged = () => {
-    return getTokens() ? true : false;
-}
-
 export const AuthProvider = ({ children }) => {
 
     const [tokens, setTokens] = useState(() => getTokens());
     const [user, setUser] = useState(() => getUser());
-    const [isLogged, setIsLogged] = useState(() => checkLogged());
+    const [isLogged, setIsLogged] = useState(user ? true : false);
     const history = useHistory();
 
     const logIn = async (event) => {
@@ -88,13 +84,12 @@ export const AuthProvider = ({ children }) => {
             refreshToken = JSON.stringify(tokens.refresh);
             jwtDecode(refreshToken);
         }
-        catch(error) {
-            console.log(error.message);
+        catch (error) {
             return logOut();
         }
         const response = await fetch("http://localhost:8000/api/v1/token/refresh/", {
             method: "POST",
-            headers: { "Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             body: refreshToken
         })
 
@@ -113,11 +108,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     const accessTokenIsValid = () => {
-        
         if (user) {
-            const expiresAt = new Date(user.exp * 1000);
-            const curDate = new Date();
-            if (curDate >= expiresAt - 86400) {
+            const expiresAt = user.exp * 1000;
+            const curDate = new Date().getTime();
+            if (curDate >= expiresAt - 86400000) {
                 return false;
             }
             else if (curDate >= expiresAt) {
@@ -131,13 +125,10 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         if (isLogged) {
             if (accessTokenIsValid()) {
-                const seconds = num => num * 1000
+                const seconds = num => num * 1000;
                 const interval = setInterval(() => {
-                    console.log("Checking if the token is valid!");
-                    if (!accessTokenIsValid()) {
-                        updateTokens();
-                    }
-                }, seconds(5));
+                    if (!accessTokenIsValid()) updateTokens();
+                }, seconds(3600));
                 return () => clearInterval(interval);
             }
             else {
