@@ -49,11 +49,18 @@ export const AuthProvider = ({ children }) => {
         event.preventDefault();
         const userData = { email: event.target.email.value, password: event.target.password.value }
 
-        const response = await fetch("http://localhost:8000/api/v1/token/", {
+        let response;
+        try {
+            response = await fetch("http://localhost:8000/api/v1/token/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userData)
-        })
+            });
+        }
+        catch(error) {
+            alert('Could not get a response from the server.');
+            return;
+        }
 
         const returnedTokens = await response.json();
 
@@ -64,6 +71,9 @@ export const AuthProvider = ({ children }) => {
             setIsLogged(true);
             localStorage.setItem("tokens", JSON.stringify(returnedTokens));
             history.push("/");
+        }
+        else if (response.status === 401) {
+            alert('Email or password are invalid.');
         }
         else {
             alert(`Email: ${returnedTokens.email}\nPassword: ${returnedTokens.password}`);
