@@ -27,8 +27,8 @@ import AllInboxIcon from '@mui/icons-material/AllInbox';
 
 // Custom Components
 import AuthContext from "../context/AuthContext";
-import { AppBar } from '../components/AppBar';
-import { Drawer } from '../components/Drawer';
+import { AppBar } from './AppBar';
+import { Drawer } from './Drawer';
 
 const mdTheme = createTheme();
 
