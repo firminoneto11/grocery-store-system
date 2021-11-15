@@ -15,6 +15,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Redirect } from "react-router";
+import image from '../assets/market.jpg'
 
 const theme = createTheme();
 
@@ -29,7 +30,7 @@ export default function LoginPage() {
             <Grid container component="main" sx={{ height: '100vh' }}>
                 <CssBaseline />
                 <Grid item xs={false} sm={4} md={7} sx={{
-                    backgroundImage: 'url(https://source.unsplash.com/random)',
+                    backgroundImage: `url(${image})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: (t) =>
                         t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
