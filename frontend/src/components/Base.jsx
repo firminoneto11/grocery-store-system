@@ -63,7 +63,7 @@ export default function Base({ children }) {
                             <MenuIcon />
                         </IconButton>
                         <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }} >
-                            Welcome {user.first_name} {user.last_name} to your Dashboard
+                            Welcome {user.first_name} {user.last_name}
                         </Typography>
                     </Toolbar>
                 </AppBar>
