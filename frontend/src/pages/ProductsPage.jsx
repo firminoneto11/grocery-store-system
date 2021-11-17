@@ -9,12 +9,14 @@ import { useState } from "react";
 import ProductForm from '../components/ProductForm';
 import { useEffect } from "react";
 import swal from 'sweetalert';
-import { Fragment } from "react";
+import Copyright from '../components/Copyright';
 import AuthContext from '../context/AuthContext';
 import { useContext } from 'react';
 import { toTitleCase } from '../utils/toTitleCase';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import { CircularProgress } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -29,8 +31,10 @@ export default function ProductsPage() {
     const setDisplayFormHandler = () => setDisplayForm(prevState => setDisplayForm(!prevState));
     const [data, setData] = useState(null);
     const { tokens, logOut } = useContext(AuthContext);
+    const [loading, setLoading] = useState(false);
 
     const getProducts = async () => {
+        setLoading(true);
         let response;
         try {
             response = await fetch("http://localhost:8000/api/v1/products/", {
@@ -42,6 +46,7 @@ export default function ProductsPage() {
             })
         }
         catch (error) {
+            setLoading(false);
             swal({
                 "title": "Error",
                 "text": `Could not get a response from the server. More details about it:\n${error.message}`,
@@ -49,11 +54,15 @@ export default function ProductsPage() {
             });
             return;
         }
-
         const returnedData = await response.json();
 
         if (response.status === 200) {
-            setData([...returnedData.results]);
+            if (!returnedData.count) {
+                setData(null);
+            }
+            else {
+                setData([...returnedData.results]);
+            }
         }
         else if (response.status === 401) {
             logOut();
@@ -64,7 +73,7 @@ export default function ProductsPage() {
                 let attName = att.split('_');
                 attName = attName.join(" ");
                 attName = toTitleCase(attName);
-                info.push(`${attName} > ${returnedData[att]}`);
+                info.push(`${attName} - ${returnedData[att]}`);
             }
             info = info.join('\n');
             swal({
@@ -73,6 +82,8 @@ export default function ProductsPage() {
                 "icon": "error"
             });
         }
+        setLoading(false);
+        // setTimeout(() => setLoading(false), 2000);
     }
 
     useEffect(() => {
@@ -82,7 +93,7 @@ export default function ProductsPage() {
     return (
         <Base>
             <CustomModal active={displayForm} close={setDisplayFormHandler}>
-                <ProductForm close={setDisplayFormHandler} />
+                <ProductForm close={setDisplayFormHandler} updateGrid={getProducts} />
             </CustomModal>
             <Box component="div" sx={{
                 backgroundColor: (theme) =>
@@ -96,7 +107,12 @@ export default function ProductsPage() {
                 <Toolbar />
                 <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                     {/* Table of data */}
-                    {data && (
+                    {loading && (
+                        <Box sx={{ textAlign: "center" }}>
+                            <CircularProgress />
+                        </Box>
+                    )}
+                    {data && !loading && (
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
@@ -127,7 +143,17 @@ export default function ProductsPage() {
                             </Grid>
                         </Grid>
                     )}
-                    <Button sx={{ marginTop: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
+                    {!data && !loading && (
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                                    <Title>There are no products registered yet</Title>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    )}
+                    <Button startIcon={<AddIcon />} sx={{ marginTop: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
+                    <Copyright sx={{ pt: 4 }} />
                 </Container>
             </Box>
         </Base>

@@ -7,9 +7,11 @@ import Typography from '@mui/material/Typography';
 import AuthContext from '../context/AuthContext';
 import { useContext } from 'react';
 import swal from 'sweetalert';
+import AddIcon from '@mui/icons-material/Add';
 import { toTitleCase } from '../utils/toTitleCase';
+import { Grid } from '@mui/material';
 
-export default function ProductForm({ close }) {
+export default function ProductForm({ close, updateGrid }) {
 
     const { tokens, logOut } = useContext(AuthContext);
 
@@ -52,7 +54,9 @@ export default function ProductForm({ close }) {
                 "title": "Success",
                 "text": `${newProduct.name} created successfully!`,
                 "icon": "success"
-            }).then(() => close());
+            })
+                .then(() => close())
+                .then(() => updateGrid());
         }
         else if (response.status === 401) {
             logOut();
@@ -63,7 +67,7 @@ export default function ProductForm({ close }) {
                 let attName = att.split('_');
                 attName = attName.join(" ");
                 attName = toTitleCase(attName);
-                info.push(`${attName} > ${returnedData[att]}`);
+                info.push(`${attName} - ${returnedData[att]}`);
             }
             info = info.join('\n');
             swal({
@@ -76,18 +80,35 @@ export default function ProductForm({ close }) {
 
     return (
         <Box component="form" onSubmit={addProduct} noValidate autoComplete="off" sx={{
-            '& .MuiTextField-root': { m: 1, width: '25ch' }
+            '& .MuiTextField-root': { m: 1, width: "25ch%" },
         }}>
             <Typography id="transition-modal-title" variant="h6" component="h2">Add a new product</Typography>
-            <Container>
-                <TextField name="name" required id="outlined-required" label="Product Name" />
-                <TextField name="unity_price" required id="outlined-number" label="Unity price" type="number" />
-                <TextField name="suppliers_percentage" required id="outlined-number" label="Supplier's percentage" type="number" />
-                <TextField name="freight_percentage" required id="outlined-number" label="Freight's percentage" type="number" />
-                <TextField name="amount_in_stock" required id="outlined-number" label="Amount in stock" type="number" />
-                <TextField name="description" id="outlined-required" label="Description" />
-            </Container>
-            <Button variant="contained" type="submit">Add product</Button>
-        </Box>
+            <Box sx={{ flexGrow: 1 }} sx={{ mt: 4, mb: 4 }}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <TextField name="name" required id="outlined-required" label="Product Name" />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <TextField name="description" id="outlined-required" label="Description" />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <TextField name="unity_price" required id="outlined-number" label="Unity price" type="number" />
+                        <TextField name="amount_in_stock" required id="outlined-number" label="Amount in stock" type="number" />
+                        <TextField name="suppliers_percentage" required id="outlined-number" label="Supplier's percentage" type="number" />
+                        <TextField name="freight_percentage" required id="outlined-number" label="Freight's percentage" type="number" />
+                    </Grid>
+                </Grid>
+                <Button sx={{
+                    display: "block",
+                    width: "50%",
+                    marginLeft: "auto",
+                    marginRight: "auto"
+                }} startIcon={<AddIcon />} variant="contained" type="submit">
+                    Add product
+                </Button>
+            </Box>
+        </Box >
     );
 }
