@@ -33,11 +33,14 @@ export default function ProductsPage() {
     const { tokens, logOut } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
 
-    const getProducts = async () => {
+    const [previous, setPrevious] = useState(null);
+    const [next, setNext] = useState(null);
+
+    const getProducts = async (page = "http://localhost:8000/api/v1/products/") => {
         setLoading(true);
         let response;
         try {
-            response = await fetch("http://localhost:8000/api/v1/products/", {
+            response = await fetch(page, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -61,6 +64,8 @@ export default function ProductsPage() {
                 setData(null);
             }
             else {
+                setNext(returnedData.next);
+                setPrevious(returnedData.previous);
                 setData([...returnedData.results]);
             }
         }
@@ -83,8 +88,10 @@ export default function ProductsPage() {
             });
         }
         setLoading(false);
-        // setTimeout(() => setLoading(false), 2000);
     }
+
+    const getNextPage = () => getProducts(next);
+    const getPreviousPage = () => getProducts(previous);
 
     useEffect(() => {
         getProducts();
@@ -115,7 +122,7 @@ export default function ProductsPage() {
                     {data && !loading && (
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
-                                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', overflowX: "auto" }}>
                                     <Title>Products List</Title>
                                     <Table size="small">
                                         <TableHead>
@@ -152,10 +159,21 @@ export default function ProductsPage() {
                             </Grid>
                         </Grid>
                     )}
-                    <Button startIcon={<AddIcon />} sx={{ marginTop: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
+
+                    <Container sx={{ textAlign: "center" }}>
+                        {previous && (<Button onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="outlined">Previous</Button>)}
+                        {next && (<Button onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="outlined">Next</Button>)}
+                    </Container>
+
+                    <Container sx={{ textAlign: "left" }}>
+                        <Button startIcon={<AddIcon />} sx={{ marginTop: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
+                    </Container>
                     <Copyright sx={{ pt: 4 }} />
                 </Container>
             </Box>
         </Base>
     );
 }
+
+// TODO: Implement a search product button;
+// TODO: Put a nice icon in both previous and next buttons;

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useContext } from "react";
 import { useHistory } from 'react-router';
+import { useEffect } from 'react';
 
 // MUI Imports
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -24,6 +25,8 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { Logout } from '@mui/icons-material';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 // Custom Components
 import AuthContext from "../context/AuthContext";
@@ -34,10 +37,14 @@ const mdTheme = createTheme();
 
 export default function Base({ children }) {
 
+    const isSmall = useMediaQuery(useTheme().breakpoints.down('lg'));
+    const isBig = useMediaQuery(useTheme().breakpoints.up('lg'));
+
     const { user, logOut } = useContext(AuthContext);
     const history = useHistory();
 
     const [open, setOpen] = useState(true);
+
     const toggleDrawer = () => {
         setOpen(!open);
     };
@@ -49,6 +56,11 @@ export default function Base({ children }) {
     const goToProducts = () => {
         history.push("/products");
     }
+
+    useEffect(() => {
+        if (isSmall && !isBig) setOpen(false);
+        else if (isBig && !isSmall) setOpen(true);
+    }, [isSmall, isBig]);
 
     return (
         <ThemeProvider theme={mdTheme}>

@@ -5,7 +5,7 @@ import { Button } from "@mui/material";
 import { Container } from "@mui/material";
 import Typography from '@mui/material/Typography';
 import AuthContext from '../context/AuthContext';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import swal from 'sweetalert';
 import AddIcon from '@mui/icons-material/Add';
 import { toTitleCase } from '../utils/toTitleCase';
@@ -69,6 +69,17 @@ export default function ProductForm({ close, updateGrid }) {
                 attName = toTitleCase(attName);
                 info.push(`${attName} - ${returnedData[att]}`);
             }
+
+            const newProductKeys = Object.keys(newProduct);
+            for (let att in returnedData) {
+                let field = newProductKeys.find(el => el === att);
+                console.log(field);
+                if (field) {
+                    form[field].error = true;
+                    // TODO: Create a useReducer to validate the fields, with server-side validation.
+                }
+            }
+
             info = info.join('\n');
             swal({
                 "title": "Error",
@@ -79,36 +90,46 @@ export default function ProductForm({ close, updateGrid }) {
     }
 
     return (
-        <Box component="form" onSubmit={addProduct} noValidate autoComplete="off" sx={{
-            '& .MuiTextField-root': { m: 1, width: "25ch%" },
+        <Container component="form" onSubmit={addProduct} noValidate autoComplete="off" sx={{
+            '& .MuiTextField-root': { mt: 1, mb: 1 },
         }}>
             <Typography id="transition-modal-title" variant="h6" component="h2">Add a new product</Typography>
-            <Box sx={{ flexGrow: 1 }} sx={{ mt: 4, mb: 4 }}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12} md={12} lg={12}>
-                        <TextField name="name" required id="outlined-required" label="Product Name" />
-                    </Grid>
+            <Box sx={{
+                mt: 4,
+                mb: 4,
+                ml: "auto",
+                mr: "auto"
+            }}>
+                <Box sx={{ flexGrow: 1 }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField fullWidth name="name" required id="outlined-required" label="Product Name" />
+                        </Grid>
 
-                    <Grid item xs={12}>
-                        <TextField name="description" id="outlined-required" label="Description" />
-                    </Grid>
+                        <Grid item xs={12}>
+                            <TextField fullWidth name="description" id="outlined-required" label="Description" />
+                        </Grid>
 
-                    <Grid item xs={12}>
-                        <TextField name="unity_price" required id="outlined-number" label="Unity price" type="number" />
-                        <TextField name="amount_in_stock" required id="outlined-number" label="Amount in stock" type="number" />
-                        <TextField name="suppliers_percentage" required id="outlined-number" label="Supplier's percentage" type="number" />
-                        <TextField name="freight_percentage" required id="outlined-number" label="Freight's percentage" type="number" />
+                        <Grid item xs={12} md={6} lg={3}>
+                            <TextField fullWidth name="unity_price" required id="outlined-number" label="Unity price" type="number" />
+                        </Grid>
+
+                        <Grid item xs={12} md={6} lg={3}>
+                            <TextField fullWidth name="amount_in_stock" required id="outlined-number" label="Amount in stock" type="number" />
+                        </Grid>
+
+                        <Grid item xs={12} md={6} lg={3}>
+                            <TextField fullWidth name="suppliers_percentage" required id="outlined-number" label="Supplier's percentage" type="number" />
+                        </Grid>
+
+                        <Grid item xs={12} md={6} lg={3}>
+                            <TextField fullWidth name="freight_percentage" required id="outlined-number" label="Freight's percentage" type="number" />
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Button sx={{
-                    display: "block",
-                    width: "50%",
-                    marginLeft: "auto",
-                    marginRight: "auto"
-                }} startIcon={<AddIcon />} variant="contained" type="submit">
-                    Add product
-                </Button>
+                </Box>
+
+                <Button sx={{ mt: "1rem" }} startIcon={<AddIcon />} variant="contained" type="submit" fullWidth>Add product</Button>
             </Box>
-        </Box >
+        </Container >
     );
 }
