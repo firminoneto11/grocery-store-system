@@ -53,16 +53,12 @@ class ProductsView(Gen):
 
     def destroy(self, _req, pk):
         """
-        This method is responsible for deleting a single product from the database. It performs a soft deletion by just
-        changing the 'is_active' attribute to false.
+        This method is responsible for deleting a single product from the database.
         """
         product = self.find_element_or_none(model=Products, identifier=pk)
         if product is not None:
-            if product.is_active:
-                product.is_active = 0
-                product.save()
-                return res(data={"success": f"{product.name} deleted successfully."}, status=HTTP_204_NO_CONTENT)
-            return res(data={"detail": f"{product.name} was deleted already."}, status=HTTP_204_NO_CONTENT)
+            product.delete()
+            return res(data={"success": "Product deleted successfully."}, status=HTTP_204_NO_CONTENT)
         return res(data=self.element_not_found, status=HTTP_404_NOT_FOUND)
 
     def findAlikes(self, _req, name):

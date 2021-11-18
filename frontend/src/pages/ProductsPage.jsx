@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import { Container } from "@mui/material";
 import CustomModal from "../components/CustomModal";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import ProductForm from '../components/ProductForm';
 import { useEffect } from "react";
 import swal from 'sweetalert';
@@ -22,6 +22,9 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import Search from "../components/Search";
 import ClearIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import Tooltip from '@mui/material/Tooltip';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -157,6 +160,59 @@ export default function ProductsPage() {
         });
     }
 
+    const deleteProduct = async (id) => {
+        swal({
+            title: "Delete product",
+            text: "Are you sure that you want to delete this product?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+            .then(async (willDelete) => {
+                if (willDelete) {
+
+                    let response;
+                    try {
+                        response = await fetch(`http://localhost:8000/api/v1/products/${id}`, {
+                            method: "DELETE",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${tokens.access}`
+                            }
+                        });
+                    }
+                    catch (error) {
+                        swal({
+                            "title": "Error",
+                            "text": `Could not get a response from the server. More details about it:\n${error.message}`,
+                            "icon": "error"
+                        });
+                        return;
+                    }
+
+                    const returnedData = await response.json();
+                    if (response.status === 204) {
+                        swal({
+                            "icon": "success",
+                            "title": "Success",
+                            "text": returnedData.success
+                        });
+                        getProducts();
+                    }
+                    else if (response.status === 401) {
+                        logOut();
+                    }
+                    else {
+                        swal({
+                            "icon": "info",
+                            "title": "",
+                            "text": returnedData.detail
+                        });
+                    }
+                }
+            });
+    }
+
     useEffect(() => {
         getProducts();
     }, []);
@@ -207,18 +263,36 @@ export default function ProductsPage() {
                                                 <TableCell>Product ID</TableCell>
                                                 <TableCell>Name</TableCell>
                                                 <TableCell>Amount in stock</TableCell>
-                                                <TableCell align="right">Unity Price</TableCell>
+                                                <TableCell>Unity Price</TableCell>
+                                                <TableCell />
+                                                <TableCell />
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {data.map((row) => (
-                                                <TableRow hover sx={{ cursor: "pointer", transition: "0.3s" }} key={row.id} onClick={() => editProduct(row)}>
-                                                    <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
-                                                    <TableCell>{row.id}</TableCell>
-                                                    <TableCell>{row.name}</TableCell>
-                                                    <TableCell>{row.amount_in_stock}</TableCell>
-                                                    <TableCell align="right">{`R$${row.unity_price}`}</TableCell>
-                                                </TableRow>
+                                                <Fragment key={row.id}>
+                                                    <TableRow hover sx={{ transition: "0.3s" }}>
+                                                        <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
+                                                        <TableCell>{row.id}</TableCell>
+                                                        <TableCell>{row.name}</TableCell>
+                                                        <TableCell>{row.amount_in_stock}</TableCell>
+                                                        <TableCell>{`R$${row.unity_price}`}</TableCell>
+                                                        <TableCell>
+                                                            <Tooltip title="Edit this item">
+                                                                <IconButton color="primary" onClick={() => editProduct(row)}>
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Tooltip title="Delete this item">
+                                                                <IconButton color="error" onClick={() => deleteProduct(row.id)}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                </Fragment>
                                             ))}
                                         </TableBody>
                                     </Table>
@@ -226,6 +300,7 @@ export default function ProductsPage() {
                             </Grid>
                         </Grid>
                     )}
+
                     {!data && !loading && (
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
@@ -237,18 +312,29 @@ export default function ProductsPage() {
                     )}
 
                     <Container sx={{ textAlign: "center" }}>
-                        <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                            <NavigateBeforeIcon />
-                        </IconButton>
-                        <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                            <NavigateNextIcon />
-                        </IconButton>
+                        <Tooltip title="Previous page">
+                            <span>
+                                <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                                    <NavigateBeforeIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+
+                        <Tooltip title="Next page">
+                            <span>
+                                <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                                    <NavigateNextIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
                     </Container>
 
                     <Container sx={{ textAlign: "left" }}>
                         <Button startIcon={<AddIcon />} sx={{ mt: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
                     </Container>
+
                     <Copyright sx={{ pt: 4 }} />
+
                 </Container>
             </Box>
         </Base>
