@@ -17,6 +17,11 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { CircularProgress } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import IconButton from '@mui/material/IconButton';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import Search from "../components/Search";
+import ClearIcon from '@mui/icons-material/Clear';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -93,6 +98,65 @@ export default function ProductsPage() {
     const getNextPage = () => getProducts(next);
     const getPreviousPage = () => getProducts(previous);
 
+    const searchProduct = async (element) => {
+        if (!element) {
+            getProducts();
+            return;
+        }
+
+        setLoading(true);
+        let response;
+
+        try {
+            response = await fetch(`http://localhost:8000/api/v1/products/${element}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${tokens.access}`
+                }
+            });
+        }
+        catch (error) {
+            setLoading(false);
+            swal({
+                "title": "Error",
+                "text": `Could not get a response from the server. More details about it:\n${error.message}`,
+                "icon": "error"
+            });
+            return;
+        }
+
+        const returnedData = await response.json();
+
+        if (response.status === 200) {
+            if (!returnedData.length) {
+                setData(null);
+            }
+            else {
+                setNext(null);
+                setPrevious(null);
+                setData(returnedData);
+            }
+        }
+        else if (response.status === 401) {
+            logOut();
+        }
+        setLoading(false);
+    }
+
+    const editProduct = (args) => {
+        const productData = { ...args };
+        let resp = '';
+        for (let [key, value] of Object.entries(productData)) {
+            resp = resp + `${key} - ${value}\n`;
+        }
+        swal({
+            "icon": "info",
+            "title": "Product's data",
+            "text": resp
+        });
+    }
+
     useEffect(() => {
         getProducts();
     }, []);
@@ -112,7 +176,19 @@ export default function ProductsPage() {
                 overflow: 'auto',
             }}>
                 <Toolbar />
-                <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+
+                <Container maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6} lg={3}>
+                            <Search searchAction={searchProduct} />
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={3}>
+                            <Button sx={{ mt: "0.25rem" }} onClick={() => getProducts()} startIcon={<ClearIcon />} variant="contained">Show all products</Button>
+                        </Grid>
+                    </Grid>
+                </Container>
+
+                <Container maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
                     {/* Table of data */}
                     {loading && (
                         <Box sx={{ textAlign: "center" }}>
@@ -136,7 +212,7 @@ export default function ProductsPage() {
                                         </TableHead>
                                         <TableBody>
                                             {data.map((row) => (
-                                                <TableRow key={row.id}>
+                                                <TableRow hover sx={{ cursor: "pointer", transition: "0.3s" }} key={row.id} onClick={() => editProduct(row)}>
                                                     <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
                                                     <TableCell>{row.id}</TableCell>
                                                     <TableCell>{row.name}</TableCell>
@@ -154,19 +230,23 @@ export default function ProductsPage() {
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                                    <Title>There are no products registered yet</Title>
+                                    <Title>No products found</Title>
                                 </Paper>
                             </Grid>
                         </Grid>
                     )}
 
                     <Container sx={{ textAlign: "center" }}>
-                        {previous && (<Button onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="outlined">Previous</Button>)}
-                        {next && (<Button onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="outlined">Next</Button>)}
+                        <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                            <NavigateBeforeIcon />
+                        </IconButton>
+                        <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                            <NavigateNextIcon />
+                        </IconButton>
                     </Container>
 
                     <Container sx={{ textAlign: "left" }}>
-                        <Button startIcon={<AddIcon />} sx={{ marginTop: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
+                        <Button startIcon={<AddIcon />} sx={{ mt: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
                     </Container>
                     <Copyright sx={{ pt: 4 }} />
                 </Container>
@@ -174,6 +254,3 @@ export default function ProductsPage() {
         </Base>
     );
 }
-
-// TODO: Implement a search product button;
-// TODO: Put a nice icon in both previous and next buttons;

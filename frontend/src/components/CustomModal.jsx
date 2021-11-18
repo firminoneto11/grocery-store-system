@@ -32,10 +32,3 @@ export default function CustomModal({ active, close, children }) {
         </Modal>
     );
 }
-
-// 
-{/*
-<Typography id="transition-modal-description" sx={{ mt: 2 }}>
-    Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-</Typography>
-*/}

@@ -64,3 +64,8 @@ class ProductsView(Gen):
                 return res(data={"success": f"{product.name} deleted successfully."}, status=HTTP_204_NO_CONTENT)
             return res(data={"detail": f"{product.name} was deleted already."}, status=HTTP_204_NO_CONTENT)
         return res(data=self.element_not_found, status=HTTP_404_NOT_FOUND)
+
+    def findAlikes(self, _req, name):
+        elements = Products.objects.filter(name__contains=name)
+        elements = self.get_serializer(instance=elements, many=True)
+        return res(data=elements.data)

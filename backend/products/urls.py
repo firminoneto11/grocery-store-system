@@ -15,6 +15,10 @@ urlpatterns = [
         'get': 'retrieve',
         'patch': 'update',
         'delete': 'destroy',
-    }), name='users')
+    }), name='users'),
+
+    path(route='products/<str:name>', view=ProductsView.as_view({
+        "get": "findAlikes"
+    }))
 
 ]
