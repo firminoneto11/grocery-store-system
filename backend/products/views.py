@@ -9,7 +9,6 @@ class ProductsView(Gen):
     
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
-    element_not_found = {"invalid_product": "Product not found with the given id."}
 
     def list(self, _req):
         """
@@ -36,7 +35,7 @@ class ProductsView(Gen):
         if product is not None:
             product = self.get_serializer(instance=product)
             return res(data=product.data)
-        return res(data=self.element_not_found, status=HTTP_404_NOT_FOUND)
+        return res(status=HTTP_404_NOT_FOUND)
 
     def update(self, req, pk):
         """
@@ -48,8 +47,8 @@ class ProductsView(Gen):
             product_serialized = self.get_serializer(data=req.data, instance=product, partial=True)
             product_serialized.is_valid(raise_exception=True)
             product_serialized.save()
-            return res(data={"success": "Product updated successfully."})
-        return res(data=self.element_not_found, status=HTTP_404_NOT_FOUND)
+            return res(product.data)
+        return res(status=HTTP_404_NOT_FOUND)
 
     def destroy(self, _req, pk):
         """
@@ -58,8 +57,8 @@ class ProductsView(Gen):
         product = self.find_element_or_none(model=Products, identifier=pk)
         if product is not None:
             product.delete()
-            return res(data={"success": "Product deleted successfully."}, status=HTTP_204_NO_CONTENT)
-        return res(data=self.element_not_found, status=HTTP_404_NOT_FOUND)
+            return res(status=HTTP_204_NO_CONTENT)
+        return res(status=HTTP_404_NOT_FOUND)
 
     def findAlikes(self, _req, name):
         elements = Products.objects.filter(name__contains=name)

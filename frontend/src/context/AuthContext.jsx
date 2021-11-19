@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useHistory } from "react-router";
 import jwtDecode from "jwt-decode";
+import swal from 'sweetalert';
 
 const AuthContext = createContext();
 export default AuthContext;
@@ -58,7 +59,11 @@ export const AuthProvider = ({ children }) => {
             });
         }
         catch (error) {
-            alert('Could not get a response from the server.');
+            swal({
+                "title": "Error",
+                "icon": "error",
+                "text": "Could not get a response from the server."
+            });
             return;
         }
 
@@ -73,10 +78,18 @@ export const AuthProvider = ({ children }) => {
             history.push("/");
         }
         else if (response.status === 401) {
-            alert('Email or password are invalid.');
+            swal({
+                "title": "Error",
+                "icon": "error",
+                "text": "Email or password are invalid."
+            });
         }
         else {
-            alert(`Email: ${returnedTokens.email}\nPassword: ${returnedTokens.password}`);
+            swal({
+                "title": "Error",
+                "icon": "error",
+                "text": `Email: ${returnedTokens.email}\nPassword: ${returnedTokens.password}`
+            });
         }
     }
 
@@ -90,18 +103,19 @@ export const AuthProvider = ({ children }) => {
 
     const updateTokens = async () => {
         let refreshToken;
+        let response;
         try {
             refreshToken = JSON.stringify(tokens.refresh);
             jwtDecode(refreshToken);
+            response = await fetch("http://localhost:8000/api/v1/token/refresh/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: refreshToken
+            })
         }
         catch (error) {
             return logOut();
         }
-        const response = await fetch("http://localhost:8000/api/v1/token/refresh/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: refreshToken
-        })
 
         const returnedTokens = await response.json();
 

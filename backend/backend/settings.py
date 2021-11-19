@@ -160,7 +160,7 @@ AUTH_USER_MODEL = 'users.Users'
 
 # DRF Configs
 
-renderer_classes = ('rest_framework.renderers.JSONRenderer', 'rest_framework.renderers.BrowsableAPIRenderer')
+# renderer_classes = ('rest_framework.renderers.JSONRenderer', 'rest_framework.renderers.BrowsableAPIRenderer')
 REST_FRAMEWORK = {
 
     # Permissions
@@ -174,7 +174,8 @@ REST_FRAMEWORK = {
     ),
 
     # API Data Renderers
-    'DEFAULT_RENDERER_CLASSES': renderer_classes if DEBUG else (renderer_classes[0], ),
+    # 'DEFAULT_RENDERER_CLASSES': renderer_classes if DEBUG else (renderer_classes[0], ),
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer', ),
 
     # Pagination
     "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.PageNumberPagination',

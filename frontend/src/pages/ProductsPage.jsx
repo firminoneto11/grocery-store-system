@@ -12,7 +12,6 @@ import swal from 'sweetalert';
 import Copyright from '../components/Copyright';
 import AuthContext from '../context/AuthContext';
 import { useContext } from 'react';
-import { toTitleCase } from '../utils/toTitleCase';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { CircularProgress } from "@mui/material";
@@ -80,21 +79,6 @@ export default function ProductsPage() {
         else if (response.status === 401) {
             logOut();
         }
-        else {
-            let info = [];
-            for (let att in returnedData) {
-                let attName = att.split('_');
-                attName = attName.join(" ");
-                attName = toTitleCase(attName);
-                info.push(`${attName} - ${returnedData[att]}`);
-            }
-            info = info.join('\n');
-            swal({
-                "title": "Error",
-                "text": info,
-                "icon": "error"
-            });
-        }
         setLoading(false);
     }
 
@@ -103,8 +87,7 @@ export default function ProductsPage() {
 
     const searchProduct = async (element) => {
         if (!element) {
-            getProducts();
-            return;
+            return getProducts();
         }
 
         setLoading(true);
@@ -160,7 +143,7 @@ export default function ProductsPage() {
         });
     }
 
-    const deleteProduct = async (id) => {
+    const deleteProduct = (id) => {
         swal({
             title: "Delete product",
             text: "Are you sure that you want to delete this product?",
@@ -190,23 +173,22 @@ export default function ProductsPage() {
                         return;
                     }
 
-                    const returnedData = await response.json();
                     if (response.status === 204) {
                         swal({
                             "icon": "success",
                             "title": "Success",
-                            "text": returnedData.success
+                            "text": "Product deleted successfully!"
                         });
                         getProducts();
                     }
                     else if (response.status === 401) {
                         logOut();
                     }
-                    else {
+                    else if (response.status === 404) {
                         swal({
-                            "icon": "info",
-                            "title": "",
-                            "text": returnedData.detail
+                            "icon": "error",
+                            "title": "Not found",
+                            "text": `Product of id ${id} not found.`
                         });
                     }
                 }
