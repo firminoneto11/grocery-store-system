@@ -44,10 +44,10 @@ class ProductsView(Gen):
         """
         product = self.find_element_or_none(model=Products, identifier=pk)
         if product is not None:
-            product_serialized = self.get_serializer(data=req.data, instance=product, partial=True)
-            product_serialized.is_valid(raise_exception=True)
-            product_serialized.save()
-            return res(product.data)
+            product = self.get_serializer(data=req.data, instance=product, partial=True)
+            product.is_valid(raise_exception=True)
+            product.save()
+            return res(data=product.data)
         return res(status=HTTP_404_NOT_FOUND)
 
     def destroy(self, _req, pk):

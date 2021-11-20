@@ -6,7 +6,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { Container } from "@mui/material";
 import CustomModal from "../components/CustomModal";
 import { Fragment, useState } from "react";
-import ProductForm from '../components/ProductForm';
+import AddProductForm from '../components/AddProductForm';
 import { useEffect } from "react";
 import swal from 'sweetalert';
 import Copyright from '../components/Copyright';
@@ -24,6 +24,9 @@ import ClearIcon from '@mui/icons-material/Clear';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
+import InfoIcon from '@mui/icons-material/Info';
+import EditProductForm from '../components/EditProductForm';
+import { toTitleCase } from '../utils/toTitleCase';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -34,8 +37,16 @@ import Title from '../components/Title';
 
 export default function ProductsPage() {
 
+    // Add product states
     const [displayForm, setDisplayForm] = useState(false);
     const setDisplayFormHandler = () => setDisplayForm(prevState => setDisplayForm(!prevState));
+
+    // Edit product states
+    const [editProductForm, setEditProductForm] = useState(false);
+    const [productData, setProductData] = useState(null);
+    const setDisplayEditFormHandler = () => setEditProductForm(prevState => setEditProductForm(!prevState));
+
+    // Data states
     const [data, setData] = useState(null);
     const { tokens, logOut } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
@@ -130,16 +141,42 @@ export default function ProductsPage() {
         setLoading(false);
     }
 
-    const editProduct = (args) => {
+    const displayProductsInfo = (args) => {
         const productData = { ...args };
-        let resp = '';
-        for (let [key, value] of Object.entries(productData)) {
-            resp = resp + `${key} - ${value}\n`;
+
+        let info = [];
+        for (let att in productData) {
+            let attName = att.split('_');
+            attName = attName.join(" ");
+            attName = toTitleCase(attName);
+            switch (att) {
+                case "created_at":
+                    info.push(`${attName} - ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
+                        toLocaleTimeString()}`);
+                    break;
+                case "updated_at":
+                    info.push(`${attName} - ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
+                        toLocaleTimeString()}`);
+                    break;
+                case "is_active":
+                    info.push(`${attName} - ${productData[att] ? "Yes" : "No"}`);
+                    break;
+                case "unity_price":
+                case "suppliers_percentage":
+                case "freight_percentage":
+                    info.push(`${attName} - R$${productData[att]}`);
+                    break;
+                default:
+                    info.push(`${attName} - ${productData[att]}`);
+                    break;
+            }
         }
+
+        info = info.join('\n');
         swal({
             "icon": "info",
-            "title": "Product's data",
-            "text": resp
+            "title": "Product's info",
+            "text": info
         });
     }
 
@@ -201,9 +238,16 @@ export default function ProductsPage() {
 
     return (
         <Base>
+            {/* Add product form modal */}
             <CustomModal active={displayForm} close={setDisplayFormHandler}>
-                <ProductForm close={setDisplayFormHandler} updateGrid={getProducts} />
+                <AddProductForm close={setDisplayFormHandler} updateGrid={getProducts} />
             </CustomModal>
+
+            {/* Edit product form modal */}
+            <CustomModal active={editProductForm} close={setDisplayEditFormHandler}>
+                <EditProductForm productData={productData} close={setDisplayEditFormHandler} updateGrid={getProducts} />
+            </CustomModal>
+
             <Box component="div" sx={{
                 backgroundColor: (theme) =>
                     theme.palette.mode === 'light'
@@ -241,6 +285,7 @@ export default function ProductsPage() {
                                     <Table size="small">
                                         <TableHead>
                                             <TableRow>
+                                                <TableCell>More info</TableCell>
                                                 <TableCell>Created at</TableCell>
                                                 <TableCell>Product ID</TableCell>
                                                 <TableCell>Name</TableCell>
@@ -254,18 +299,33 @@ export default function ProductsPage() {
                                             {data.map((row) => (
                                                 <Fragment key={row.id}>
                                                     <TableRow hover sx={{ transition: "0.3s" }}>
+
+                                                        <TableCell>
+                                                            <Tooltip title="Click to see more info about this product">
+                                                                <IconButton color="primary" onClick={() => displayProductsInfo(row)}
+                                                                >
+                                                                    <InfoIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </TableCell>
+
                                                         <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
                                                         <TableCell>{row.id}</TableCell>
                                                         <TableCell>{row.name}</TableCell>
                                                         <TableCell>{row.amount_in_stock}</TableCell>
                                                         <TableCell>{`R$${row.unity_price}`}</TableCell>
+
                                                         <TableCell>
                                                             <Tooltip title="Edit this item">
-                                                                <IconButton color="primary" onClick={() => editProduct(row)}>
+                                                                <IconButton color="primary" onClick={() => {
+                                                                    setProductData(row);
+                                                                    return setDisplayEditFormHandler();
+                                                                }}>
                                                                     <EditIcon />
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </TableCell>
+
                                                         <TableCell>
                                                             <Tooltip title="Delete this item">
                                                                 <IconButton color="error" onClick={() => deleteProduct(row.id)}>
@@ -273,6 +333,7 @@ export default function ProductsPage() {
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </TableCell>
+
                                                     </TableRow>
                                                 </Fragment>
                                             ))}
