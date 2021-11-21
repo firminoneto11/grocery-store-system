@@ -57,6 +57,10 @@ export default function Base({ children }) {
         history.push("/products");
     }
 
+    const goToSell = () => {
+        history.push("/sell");
+    }
+
     useEffect(() => {
         if (isSmall && !isBig) setOpen(false);
         else if (isBig && !isSmall) setOpen(true);
@@ -109,7 +113,7 @@ export default function Base({ children }) {
                         </ListItem>
 
                         {/* Sell Page button */}
-                        <ListItem button>
+                        <ListItem button onClick={goToSell}>
                             <ListItemIcon>
                                 <ShoppingCartIcon />
                             </ListItemIcon>
