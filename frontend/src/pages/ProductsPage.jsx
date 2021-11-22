@@ -151,23 +151,25 @@ export default function ProductsPage() {
             attName = toTitleCase(attName);
             switch (att) {
                 case "created_at":
-                    info.push(`${attName} - ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
+                    info.push(`${attName} : ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
                         toLocaleTimeString()}`);
                     break;
                 case "updated_at":
-                    info.push(`${attName} - ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
+                    info.push(`${attName} : ${new Date(productData[att]).toLocaleDateString()}:${new Date(productData[att]).
                         toLocaleTimeString()}`);
                     break;
                 case "is_active":
-                    info.push(`${attName} - ${productData[att] ? "Yes" : "No"}`);
+                    info.push(`${attName} : ${productData[att] ? "Yes" : "No"}`);
                     break;
                 case "unity_price":
+                    info.push(`${attName} : R$${productData[att]}`);
+                    break;
                 case "suppliers_percentage":
                 case "freight_percentage":
-                    info.push(`${attName} - R$${productData[att]}`);
+                    info.push(`${attName} : ${productData[att]}%`);
                     break;
                 default:
-                    info.push(`${attName} - ${productData[att]}`);
+                    info.push(`${attName} : ${productData[att]}`);
                     break;
             }
         }
@@ -356,19 +358,15 @@ export default function ProductsPage() {
 
                     <Container sx={{ textAlign: "center" }}>
                         <Tooltip title="Previous page">
-                            <span>
-                                <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                                    <NavigateBeforeIcon />
-                                </IconButton>
-                            </span>
+                            <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                                <NavigateBeforeIcon />
+                            </IconButton>
                         </Tooltip>
 
                         <Tooltip title="Next page">
-                            <span>
-                                <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                                    <NavigateNextIcon />
-                                </IconButton>
-                            </span>
+                            <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
+                                <NavigateNextIcon />
+                            </IconButton>
                         </Tooltip>
                     </Container>
 
