@@ -60,6 +60,7 @@ class MockData:
             for row in not_repeated:
                 writer.writerow(row)
             if len(repeated) > 0:
+                print(f"\nFound {len(repeated)} products repeated:")
                 for row in repeated:
                     print(f"'{row[cls.headers[0]]}' found more than once!")
                     writer.writerow(row)
@@ -128,9 +129,9 @@ class MockData:
                     for line in query:
                         cursor.execute(line)
                 except Exception as error:
-                    print(f"An error occurred: {error}")
+                    print(f"\nAn error occurred: {error}\n")
                 else:
-                    print("Database populated successfully!")
+                    print("\nDatabase populated successfully!\n")
 
 
 if __name__ == "__main__":

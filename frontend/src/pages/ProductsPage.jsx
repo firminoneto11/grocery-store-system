@@ -17,8 +17,7 @@ import Paper from '@mui/material/Paper';
 import { CircularProgress } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import Stack from '@mui/material/Stack';
 import Search from "../components/Search";
 import ClearIcon from '@mui/icons-material/Clear';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,6 +26,7 @@ import Tooltip from '@mui/material/Tooltip';
 import InfoIcon from '@mui/icons-material/Info';
 import EditProductForm from '../components/EditProductForm';
 import { toTitleCase } from '../utils/toTitleCase';
+import PaginationBar from '../components/PaginationBar';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -46,13 +46,17 @@ export default function ProductsPage() {
     const [productData, setProductData] = useState(null);
     const setDisplayEditFormHandler = () => setEditProductForm(prevState => setEditProductForm(!prevState));
 
+    // Pagination states
+    const [pagesAmount, setPagesAmount] = useState(1);
+    const [shouldHide, setShouldHide] = useState(false);
+
     // Data states
     const [data, setData] = useState(null);
     const { tokens, logOut } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
 
-    const [previous, setPrevious] = useState(null);
-    const [next, setNext] = useState(null);
+    // const [previous, setPrevious] = useState(null);
+    // const [next, setNext] = useState(null);
 
     const getProducts = async (page = "http://localhost:8000/api/v1/products/") => {
         setLoading(true);
@@ -82,8 +86,7 @@ export default function ProductsPage() {
                 setData(null);
             }
             else {
-                setNext(returnedData.next);
-                setPrevious(returnedData.previous);
+                setPagesAmount(Math.floor(returnedData.count / 10) + 1);
                 setData([...returnedData.results]);
             }
         }
@@ -92,9 +95,6 @@ export default function ProductsPage() {
         }
         setLoading(false);
     }
-
-    const getNextPage = () => getProducts(next);
-    const getPreviousPage = () => getProducts(previous);
 
     const searchProduct = async (element) => {
         if (!element) {
@@ -130,8 +130,7 @@ export default function ProductsPage() {
                 setData(null);
             }
             else {
-                setNext(null);
-                setPrevious(null);
+                setShouldHide(true);
                 setData(returnedData);
             }
         }
@@ -356,20 +355,15 @@ export default function ProductsPage() {
                         </Grid>
                     )}
 
-                    <Container sx={{ textAlign: "center" }}>
-                        <Tooltip title="Previous page">
-                            <IconButton disabled={previous ? false : true} onClick={getPreviousPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                                <NavigateBeforeIcon />
-                            </IconButton>
-                        </Tooltip>
+                    {/* Pagination area */}
+                    <Stack spacing={2} alignItems="center" sx={{
+                        mt: 2, mb: 2,
+                        display: shouldHide ? "none" : "flex"
+                    }}>
+                        <PaginationBar pageProps={{ pagesAmount, getProducts }} />
+                    </Stack>
 
-                        <Tooltip title="Next page">
-                            <IconButton disabled={next ? false : true} onClick={getNextPage} sx={{ mt: "1rem", mr: "0.5rem" }} variant="contained">
-                                <NavigateNextIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </Container>
-
+                    {/* Add product button */}
                     <Container sx={{ textAlign: "left" }}>
                         <Button startIcon={<AddIcon />} sx={{ mt: "1rem" }} onClick={setDisplayFormHandler} variant="contained">Add Product</Button>
                     </Container>
