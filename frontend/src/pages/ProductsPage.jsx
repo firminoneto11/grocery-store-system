@@ -55,9 +55,6 @@ export default function ProductsPage() {
     const { tokens, logOut } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
 
-    // const [previous, setPrevious] = useState(null);
-    // const [next, setNext] = useState(null);
-
     const getProducts = async (page = "http://localhost:8000/api/v1/products/") => {
         setLoading(true);
         let response;
@@ -83,9 +80,11 @@ export default function ProductsPage() {
 
         if (response.status === 200) {
             if (!returnedData.count) {
+                setShouldHide(true);
                 setData(null);
             }
             else {
+                setShouldHide(false);
                 setPagesAmount(Math.floor(returnedData.count / 10) + 1);
                 setData([...returnedData.results]);
             }
@@ -98,6 +97,7 @@ export default function ProductsPage() {
 
     const searchProduct = async (element) => {
         if (!element) {
+            setShouldHide(true);
             return getProducts();
         }
 
@@ -127,6 +127,7 @@ export default function ProductsPage() {
 
         if (response.status === 200) {
             if (!returnedData.length) {
+                setShouldHide(true);
                 setData(null);
             }
             else {

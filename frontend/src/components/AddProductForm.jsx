@@ -5,7 +5,7 @@ import { Button } from "@mui/material";
 import { Container } from "@mui/material";
 import Typography from '@mui/material/Typography';
 import AuthContext from '../context/AuthContext';
-import { useContext } from 'react';
+import { useContext, useReducer } from 'react';
 import swal from 'sweetalert';
 import AddIcon from '@mui/icons-material/Add';
 import { toTitleCase } from '../utils/toTitleCase';
@@ -17,6 +17,51 @@ import Checkbox from '@mui/material/Checkbox';
 export default function ProductForm({ close, updateGrid }) {
 
     const { tokens, logOut } = useContext(AuthContext);
+
+    const [nameState, dispatchName] = useReducer((prevState, action) => {
+
+        if (!action) return { helperText: "", isValid: true };
+        else if (action.type === "invalidName") {
+            return { helperText: action.text, isValid: false };
+        }
+
+    }, { helperText: "", isValid: true });
+
+    const [unityPriceState, dispatchUnityPrice] = useReducer((prevState, action) => {
+
+        if (!action) return { helperText: "", isValid: true };
+        else if (action.type === "invalidUnityPrice") {
+            return { helperText: action.text, isValid: false };
+        }
+
+    }, { value: "", isValid: true });
+
+    const [amountInStockState, dispatchAmountInStock] = useReducer((prevState, action) => {
+
+        if (!action) return { helperText: "", isValid: true };
+        else if (action.type === "invalidAmountInStock") {
+            return { helperText: action.text, isValid: false };
+        }
+
+    }, { value: "", isValid: true });
+
+    const [suppliersPercentageState, dispatchSuppliersPercentage] = useReducer((prevState, action) => {
+
+        if (!action) return { helperText: "", isValid: true };
+        else if (action.type === "invalidSuppliersPercentage") {
+            return { helperText: action.text, isValid: false };
+        }
+
+    }, { value: "", isValid: true });
+
+    const [freightPercentageState, dispatchFreightPercentage] = useReducer((prevState, action) => {
+
+        if (!action) return { helperText: "", isValid: true };
+        else if (action.type === "invalidFreightPercentage") {
+            return { helperText: action.text, isValid: false };
+        }
+
+    }, { value: "", isValid: true });
 
     const addProduct = async (event) => {
         event.preventDefault();
@@ -75,13 +120,53 @@ export default function ProductForm({ close, updateGrid }) {
                 info.push(`${attName} - ${returnedData[att]}`);
             }
 
-            const newProductKeys = Object.keys(newProduct);
-            for (let att in returnedData) {
-                let field = newProductKeys.find(el => el === att);
-                console.log(field);
-                if (field) {
-                    form[field].error = true;
-                    // TODO: Create a useReducer to validate the fields, with server-side validation.
+            // Performing a server-side validation. When a user inputs some incorrect data, the server will respond
+            // specifying which fields were not satisfied. Then, based on this response, this algorithm will set
+            // each field as valid or not valid with the dispatch function provided by useReducer react hook.
+            const returnedDataKeys = Object.keys(returnedData);
+            for (let key in newProduct) {
+                const existsInReturnedData = returnedDataKeys.some(el => el === key);
+                if (existsInReturnedData) {
+                    switch (key) {
+                        case "name":
+                            dispatchName({ type: "invalidName", text: returnedData[key] });
+                            break;
+                        case "unity_price":
+                            dispatchUnityPrice({ type: "invalidUnityPrice", text: returnedData[key] });
+                            break;
+                        case "amount_in_stock":
+                            dispatchAmountInStock({ type: "invalidAmountInStock", text: returnedData[key] });
+                            break;
+                        case "suppliers_percentage":
+                            dispatchSuppliersPercentage({ type: "invalidSuppliersPercentage", text: returnedData[key] });
+                            break;
+                        case "freight_percentage":
+                            dispatchFreightPercentage({ type: "invalidFreightPercentage", text: returnedData[key] });
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else {
+                    switch (key) {
+                        case "name":
+                            dispatchName();
+                            break;
+                        case "unity_price":
+                            dispatchUnityPrice();
+                            break;
+                        case "amount_in_stock":
+                            dispatchAmountInStock();
+                            break;
+                        case "suppliers_percentage":
+                            dispatchSuppliersPercentage();
+                            break;
+                        case "freight_percentage":
+                            dispatchFreightPercentage();
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
@@ -108,7 +193,9 @@ export default function ProductForm({ close, updateGrid }) {
                 <Box sx={{ flexGrow: 1 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                            <TextField fullWidth name="name" required id="outlined-required" label="Product Name" />
+                            <TextField fullWidth name="name" required id="outlined-required" label="Product Name"
+                                error={!nameState.isValid}
+                                helperText={nameState.helperText} />
                         </Grid>
 
                         <Grid item xs={12}>
@@ -122,19 +209,28 @@ export default function ProductForm({ close, updateGrid }) {
                         </Grid>
 
                         <Grid item xs={12} md={6} lg={3}>
-                            <TextField fullWidth name="unity_price" required id="outlined-number" label="Unity price" type="number" />
+                            <TextField fullWidth name="unity_price" required id="outlined-number" label="Unity price" type="number"
+                                error={!unityPriceState.isValid}
+                                helperText={unityPriceState.helperText} />
                         </Grid>
 
                         <Grid item xs={12} md={6} lg={3}>
-                            <TextField fullWidth name="amount_in_stock" required id="outlined-number" label="Amount in stock" type="number" />
+                            <TextField fullWidth name="amount_in_stock" required id="outlined-number" label="Amount in stock"
+                                type="number" error={!amountInStockState.isValid} helperText={amountInStockState.helperText} />
                         </Grid>
 
                         <Grid item xs={12} md={6} lg={3}>
-                            <TextField fullWidth name="suppliers_percentage" required id="outlined-number" label="Supplier's percentage" type="number" />
+                            <TextField fullWidth name="suppliers_percentage" required id="outlined-number"
+                                label="Supplier's percentage" type="number"
+                                error={!suppliersPercentageState.isValid}
+                                helperText={suppliersPercentageState.helperText} />
                         </Grid>
 
                         <Grid item xs={12} md={6} lg={3}>
-                            <TextField fullWidth name="freight_percentage" required id="outlined-number" label="Freight's percentage" type="number" />
+                            <TextField fullWidth name="freight_percentage" required id="outlined-number"
+                                label="Freight's percentage" type="number"
+                                error={!freightPercentageState.isValid}
+                                helperText={freightPercentageState.helperText} />
                         </Grid>
                     </Grid>
                 </Box>

@@ -6,6 +6,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export default function PaginationBar({ pageProps }) {
 
+    // TODO: Reset the page count after a search for a blank value or clicking on the 'get all products' button!
+
     const pageSwap = (event, value) => {
         if (value !== 1) {
             const page = `http://localhost:8000/api/v1/products/?page=${value}`;
