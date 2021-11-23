@@ -14,7 +14,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import SaveIcon from '@mui/icons-material/Save';
 
-export default function EditProductForm({ close, updateGrid, productData }) {
+export default function EditProductForm({ close, updateGrid, productData, setShouldReset }) {
 
     const { tokens, logOut } = useContext(AuthContext);
 
@@ -55,6 +55,7 @@ export default function EditProductForm({ close, updateGrid, productData }) {
         const returnedData = await response.json();
 
         if (response.status === 200) {
+            setShouldReset(true);
             swal({
                 "title": "Success",
                 "text": `${product.name} updated successfully!`,

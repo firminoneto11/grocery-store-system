@@ -35,7 +35,7 @@ class ProductsView(Gen):
         if product is not None:
             product = self.get_serializer(instance=product)
             return res(data=product.data)
-        return res(status=HTTP_404_NOT_FOUND)
+        return res(data={"not-found": "Not found"}, status=HTTP_404_NOT_FOUND)
 
     def update(self, req, pk):
         """

@@ -14,7 +14,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 
-export default function ProductForm({ close, updateGrid }) {
+export default function ProductForm({ close, updateGrid, setShouldReset }) {
 
     const { tokens, logOut } = useContext(AuthContext);
 
@@ -34,7 +34,7 @@ export default function ProductForm({ close, updateGrid }) {
             return { helperText: action.text, isValid: false };
         }
 
-    }, { value: "", isValid: true });
+    }, { helperText: "", isValid: true });
 
     const [amountInStockState, dispatchAmountInStock] = useReducer((prevState, action) => {
 
@@ -43,7 +43,7 @@ export default function ProductForm({ close, updateGrid }) {
             return { helperText: action.text, isValid: false };
         }
 
-    }, { value: "", isValid: true });
+    }, { helperText: "", isValid: true });
 
     const [suppliersPercentageState, dispatchSuppliersPercentage] = useReducer((prevState, action) => {
 
@@ -52,7 +52,7 @@ export default function ProductForm({ close, updateGrid }) {
             return { helperText: action.text, isValid: false };
         }
 
-    }, { value: "", isValid: true });
+    }, { helperText: "", isValid: true });
 
     const [freightPercentageState, dispatchFreightPercentage] = useReducer((prevState, action) => {
 
@@ -61,7 +61,7 @@ export default function ProductForm({ close, updateGrid }) {
             return { helperText: action.text, isValid: false };
         }
 
-    }, { value: "", isValid: true });
+    }, { helperText: "", isValid: true });
 
     const addProduct = async (event) => {
         event.preventDefault();
@@ -75,6 +75,12 @@ export default function ProductForm({ close, updateGrid }) {
             amount_in_stock: form.amount_in_stock.value,
             suppliers_percentage: form.suppliers_percentage.value,
             freight_percentage: form.freight_percentage.value,
+        }
+
+        // Preventing the user from creating products with numbers as name
+        if (!isNaN(newProduct.name)) {
+            dispatchName({ type: "invalidName", text: "The product's name can't be a number." });
+            return;
         }
 
         let response;
@@ -100,6 +106,7 @@ export default function ProductForm({ close, updateGrid }) {
         const returnedData = await response.json();
 
         if (response.status === 201) {
+            setShouldReset(true);
             swal({
                 "title": "Success",
                 "text": `${newProduct.name} created successfully!`,

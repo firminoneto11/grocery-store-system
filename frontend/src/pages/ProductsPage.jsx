@@ -49,6 +49,7 @@ export default function ProductsPage() {
     // Pagination states
     const [pagesAmount, setPagesAmount] = useState(1);
     const [shouldHide, setShouldHide] = useState(false);
+    const [shouldReset, setShouldReset] = useState(false);
 
     // Data states
     const [data, setData] = useState(null);
@@ -85,7 +86,7 @@ export default function ProductsPage() {
             }
             else {
                 setShouldHide(false);
-                setPagesAmount(Math.floor(returnedData.count / 10) + 1);
+                setPagesAmount(returnedData.count <= 10 ? 1 : Math.floor(returnedData.count / 10) + 1);
                 setData([...returnedData.results]);
             }
         }
@@ -126,14 +127,22 @@ export default function ProductsPage() {
         const returnedData = await response.json();
 
         if (response.status === 200) {
-            if (!returnedData.length) {
+            if ((returnedData instanceof Array) && (!returnedData.length)) {
                 setShouldHide(true);
                 setData(null);
             }
-            else {
+            else if ((returnedData instanceof Array) && (returnedData.length)) {
                 setShouldHide(true);
                 setData(returnedData);
             }
+            else if (returnedData instanceof Object) {
+                setShouldHide(true);
+                setData([returnedData]);
+            }
+        }
+        else if (response.status === 404) {
+            setShouldHide(true);
+            setData(null);
         }
         else if (response.status === 401) {
             logOut();
@@ -213,6 +222,7 @@ export default function ProductsPage() {
                     }
 
                     if (response.status === 204) {
+                        setShouldReset(true);
                         swal({
                             "icon": "success",
                             "title": "Success",
@@ -242,12 +252,14 @@ export default function ProductsPage() {
         <Base>
             {/* Add product form modal */}
             <CustomModal active={displayForm} close={setDisplayFormHandler}>
-                <AddProductForm close={setDisplayFormHandler} updateGrid={getProducts} />
+                <AddProductForm close={setDisplayFormHandler} updateGrid={getProducts}
+                    setShouldReset={setShouldReset} />
             </CustomModal>
 
             {/* Edit product form modal */}
             <CustomModal active={editProductForm} close={setDisplayEditFormHandler}>
-                <EditProductForm productData={productData} close={setDisplayEditFormHandler} updateGrid={getProducts} />
+                <EditProductForm productData={productData} close={setDisplayEditFormHandler} updateGrid={getProducts}
+                    setShouldReset={setShouldReset} />
             </CustomModal>
 
             <Box component="div" sx={{
@@ -267,7 +279,10 @@ export default function ProductsPage() {
                             <Search searchAction={searchProduct} />
                         </Grid>
                         <Grid item xs={12} md={6} lg={3}>
-                            <Button sx={{ mt: "0.25rem" }} onClick={() => getProducts()} startIcon={<ClearIcon />} variant="contained">Show all products</Button>
+                            <Button sx={{ mt: "0.25rem" }} onClick={() => {
+                                setShouldReset(true);
+                                return getProducts()
+                            }} startIcon={<ClearIcon />} variant="contained">Show all products</Button>
                         </Grid>
                     </Grid>
                 </Container>
@@ -361,7 +376,10 @@ export default function ProductsPage() {
                         mt: 2, mb: 2,
                         display: shouldHide ? "none" : "flex"
                     }}>
-                        <PaginationBar pageProps={{ pagesAmount, getProducts }} />
+                        <PaginationBar pageProps={{
+                            pagesAmount, getProducts, shouldHide,
+                            shouldReset, setShouldReset
+                        }} />
                     </Stack>
 
                     {/* Add product button */}

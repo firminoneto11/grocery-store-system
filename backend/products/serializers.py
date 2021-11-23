@@ -19,12 +19,12 @@ class ProductsSerializer(ModelSerializer):
         value = float(value)
         if value and (value > 0 and value < 100):
             return value
-        elif value and (value < 0 or value > 100):
+        elif value and (value <= 0 or value >= 100):
             raise ValidationError(detail="The supplier's percentage must be a value beetwen 0 and 100.")
 
     def validate_freight_percentage(self, value):
         value = float(value)
         if value and (value > 0 and value < 100):
             return value
-        elif value and (value < 0 or value > 100):
+        elif value and (value <= 0 or value >= 100):
             raise ValidationError(detail="The freight's percentage must be a value beetwen 0 and 100.")
