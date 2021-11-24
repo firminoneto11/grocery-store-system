@@ -24,8 +24,7 @@ class SalesSerializer(ModelSerializer):
         model = Sales
         fields= "__all__"
         extra_kwargs = {
-            "invoice_id": {"read_only": True},
-            "purchase_date": {"read_only": True},
+            "purchase_date": {"read_only": True}
         }
 
     def validate_product_id(self, value):
@@ -33,7 +32,7 @@ class SalesSerializer(ModelSerializer):
         # Validating if the id was set
         if not value:
             raise ValidationError(detail="Product id was not informed")
-        return True
+        return value
 
     def create(self, validated_data: Dict):
         """
@@ -41,5 +40,5 @@ class SalesSerializer(ModelSerializer):
         products is that we are saving into the database. So, here, in the "product_id" key, value pair, we specify that it's 
         value will now be a instance of products with the given id.
         """
-        validated_data["product_id"] = Products.objects.get(pk=validated_data.get("product_id"))
+        # validated_data["product_id"] = Products.objects.get(pk=validated_data.get("product_id"))
         return super(SalesSerializer, self).create(validated_data)
