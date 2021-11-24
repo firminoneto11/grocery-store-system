@@ -20,11 +20,10 @@ class Invoices(models.Model):
 class Sales(models.Model):
 
     # Foreign keys
-
     # Auto generated
-    invoice_id = models.ForeignKey(to=Invoices, related_name="invoice", on_delete=models.SET_NULL, blank=False, null=True, 
-        db_column="invoice_id")
-    
+    invoice_id = models.ForeignKey(to=Invoices, related_name="invoice", blank=False, null=False, db_column="invoice_id", 
+        on_delete=models.CASCADE)
+
     # Required
     product_id = models.ForeignKey(to=Products, related_name="product", on_delete=models.SET_NULL, blank=False, null=True,
         db_column="product_id")

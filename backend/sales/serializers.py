@@ -1,6 +1,4 @@
-from typing import Dict
 from rest_framework.serializers import ModelSerializer, ValidationError
-from products.models import Products
 from .models import Sales, Invoices
 
 
@@ -28,17 +26,13 @@ class SalesSerializer(ModelSerializer):
         }
 
     def validate_product_id(self, value):
-
-        # Validating if the id was set
         if not value:
-            raise ValidationError(detail="Product id was not informed")
+            raise ValidationError(detail={"detail": "Product id was not informed"})
         return value
 
-    def create(self, validated_data: Dict):
-        """
-        Here we are overriding the create() method for this SalesSerializer class, because we need to specify which instance of
-        products is that we are saving into the database. So, here, in the "product_id" key, value pair, we specify that it's 
-        value will now be a instance of products with the given id.
-        """
-        # validated_data["product_id"] = Products.objects.get(pk=validated_data.get("product_id"))
-        return super(SalesSerializer, self).create(validated_data)
+    def validate_amount(self, value):
+        if not value:
+            raise ValidationError(detail={"detail": "Purchase amount was not set"})
+        elif value <= 0:
+            raise ValidationError(detail={"detail": "Purchase amount can't be less or equal to 0"})
+        return value
