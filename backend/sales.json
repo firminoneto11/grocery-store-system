@@ -1,15 +1,13 @@
-
 {
-    "sales": [
-        {"amount": 10, "product_id": 1, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 9, "product_id": 12, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 8, "product_id": 3, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 7, "product_id": 8, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 6, "product_id": 9, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 5, "product_id": 11, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 4, "product_id": 38, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 3, "product_id": 57, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 2, "product_id": 42, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"},
-        {"amount": 1, "product_id": 51, "customers_name": "Nagata", "customers_cpf": "123.456.789-10"}
-    ]
+	"sales": [
+		{ "amount": 9, "product_id": 43, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 8, "product_id": 11, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 7, "product_id": 112, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 6, "product_id": 100, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 5, "product_id": 2, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 4, "product_id": 141, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 3, "product_id": 89, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 2, "product_id": 144, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" },
+		{ "amount": 1, "product_id": 40, "customers_name": "Nagata", "customers_cpf": "123.456.789-10" }
+	]
 }

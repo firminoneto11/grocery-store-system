@@ -39,29 +39,46 @@ class SalesView(Gen):
                 cur_product: Products = Products.objects.get(pk=int(sale.get("product_id")))
                 amount_bought = sale.get("amount")
 
+                # Checking if the Product wasn't already in the products list
+                if cur_product in products:
+                    return res(
+                        data={
+                            "detail": f"Product '{cur_product.name}' was informed twice. Change the amount if you want to sell more than one"
+                        },
+                        status=HTTP_400_BAD_REQUEST
+                    )
+                
+                # Checking if the Product is active
+                if not cur_product.is_active:
+                    return res(
+                        data={
+                            "detail": f"Product '{cur_product.name}' is inactive therefore can not be sold"
+                        },
+                        status=HTTP_400_BAD_REQUEST
+                    )
+
                 # Checking if the amount is a positive integer
                 if not isinstance(amount_bought, int):
                     return res(
                         data={
-                            "detail": "Purchase amount must be a valid integer"
+                            "detail": f"Purchase amount of '{cur_product.name}' must be a valid integer"
                         },
                         status=HTTP_400_BAD_REQUEST
                     )
                 elif amount_bought <= 0:
                     return res(
                         data={
-                            "detail": "Purchase amount can't be less or equal to 0"
+                            "detail": f"Purchase amount of '{cur_product.name}' can't be less or equal to 0"
                         },
                         status=HTTP_400_BAD_REQUEST
                     )
 
-                # Checking if is possible to buy this amount. If it is, it will update the current product's
-                # amount in stock
+                # Checking if is possible to buy this amount. If it is, it will update the current product's amount in stock
                 new_amount = cur_product.amount_in_stock - amount_bought
                 if new_amount < 0:
                     return res(
                         data={
-                            "detail": f"Can't buy {amount_bought} unities of {cur_product.name} because the new amount would be less than 0"
+                            "detail": f"Can't buy {amount_bought} unities of '{cur_product.name}' because the new amount would be less than 0"
                         },
                         status=HTTP_400_BAD_REQUEST
                     )
@@ -78,14 +95,14 @@ class SalesView(Gen):
                 invoice.taxes += tax_total
                 invoice.net_total += net_total
 
-                # Appending the product of the current iteration to a list of products in order to be updated later
-                # at once, making sure that only 1 database transaction happens
+                # Appending the product of the current iteration to a list of products in order to be updated laterat once, making 
+                # sure that only one database transaction happens
                 products.append(cur_product)
 
             # Saving the product changes in the 'amount_in_stock' field
-            Products.objects.bulk_update(products, ["amount_in_stock", "updated_at"])
+            Products.objects.bulk_update(products, ["amount_in_stock"])
 
-            # TODO: The bulk_update method is not updating the 'updated_at' field. Find a way to update it!
+            # TODO: Find a way to update the 'updated_at' field without the need of a trigger in the database;
 
             # Saving the new invoice
             invoice.save()
