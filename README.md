@@ -11,6 +11,18 @@ This system's goal is to help a manager of a grocery store to organize his/her s
 * Administrative panel where the manager is able to check the stock's performace;
 
 ___
+## 💻 Tech Stack 💻
+
+In order to build this project, the following technologies were used:
+
+* [Python](https://www.python.org/)
+* [Django](https://www.djangoproject.com/)
+* [Django Rest Framework](https://www.django-rest-framework.org/)
+* [PostgreSQL](https://www.postgresql.org/)
+* [React.js](https://reactjs.org/)
+* [Material-UI](https://mui.com/)
+
+___
 ## 🏢 Business rules 🏢
 
 - [x] When a sale is made on the sale screen, the product's table has to be updated in the 'amount_in_stock' field according to the amount of the products that were sold.
@@ -20,12 +32,12 @@ ___
 - [x] On the sales table, the customer's name and customer's cpf are optional, because not everyone wants to share this information.
 
 ___
-## 💻 Screens 💻
+## 📺 Screens 📺
 
 Accordingly to the propsed functionalities, the following screens should be implemented:
 
 - [x] Login screen for the system manager. All the other screens/routes must have authentication rules with JWT
-- [x] Dashboard screen. This is the first screen that should be displayed right after a successfull login.
+- [ ] Dashboard screen. This is the first screen that should be displayed right after a successfull login.
 - [x] Register product screen
 - [x] List products screen
 - [x] Edit product screen
