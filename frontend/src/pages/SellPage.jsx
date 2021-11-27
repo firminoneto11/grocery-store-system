@@ -3,21 +3,75 @@
 import Title from '../components/Title';
 import Base from '../components/Base';
 import AuthContext from '../context/AuthContext';
+import swal from 'sweetalert';
+import { toTitleCase } from '../utils/toTitleCase';
 
 // React imports
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 
 // MUI imports
 import { Box } from '@mui/system';
-import { Toolbar, Button, TextField, Grid, Paper, Container, Autocomplete, Tooltip, IconButton } from '@mui/material';
+import {
+    Toolbar, Button, TextField, Grid, Paper, Container, Autocomplete, Tooltip, IconButton, CircularProgress
+} from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 
 export default function SellPage() {
 
     const { tokens, logOut } = useContext(AuthContext);
-    const [products, setProducts] = useState([]);
-    const [clearIcon, setClearIcon] = useState(false);
+    const [cartProducts, setCartProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState('');
+
+    // States for the asynchronous Autocomplete
+    const [open, setOpen] = useState(false);
+    const [options, setOptions] = useState([]);
+    const loading = open && options.length === 0;
+
+    const getAllProducts = async () => {
+        const url = "http://localhost:8000/api/v1/all_products/";
+        let response;
+        try {
+            response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${tokens.access}`
+                }
+            })
+        }
+        catch (error) {
+            swal({
+                "title": "Error",
+                "text": `Could not get a response from the server. More details about it:\n${error.message}`,
+                "icon": "error"
+            });
+            return;
+        }
+
+        const returnedData = await response.json();
+
+        if (response.status === 200) {
+            return returnedData;
+        }
+        else if (response.status === 401) {
+            logOut();
+        }
+        else {
+            let info = [];
+            for (let att in returnedData) {
+                let attName = att.split('_');
+                attName = attName.join(" ");
+                attName = toTitleCase(attName);
+                info.push(`${attName} - ${returnedData[att]}`);
+            }
+            info = info.join('\n');
+            swal({
+                "title": "Error",
+                "text": info,
+                "icon": "error"
+            });
+        }
+    }
 
     const addProduct = (event) => {
         event.preventDefault();
@@ -29,28 +83,54 @@ export default function SellPage() {
             amount: event.target.amount.value
         };
 
-        // Resetting the states
-        setSelectedProduct('');
-        event.target.amount.value = "";
-        setClearIcon(false);
-
-        console.log(product);
+        // Inserting the selected product into the cart
+        setCartProducts((prevState) => {
+            if (prevState.some(el => el.product_id === product.product_id)) {
+                alert("Product added already!");
+                return [...prevState];
+            }
+            else if (product.amount > selectedProduct.amount_in_stock) {
+                alert(
+                    `Can't buy ${product.amount}x of '${selectedProduct.name}' because it will exceed the amount in stock for this item.`
+                );
+                return [...prevState];
+            }
+            else if (!prevState.length) {
+                // Resetting the states
+                // TODO: Find a way to remove the little 'X' icon after a insertion in the cart
+                setSelectedProduct('');
+                event.target.amount.value = "";
+                return [product];
+            }
+            // Resetting the states
+            // TODO: Find a way to remove the little 'X' icon after a insertion in the cart
+            setSelectedProduct('');
+            event.target.amount.value = "";
+            return [product, ...prevState];
+        })
     };
 
     const submitHandler = (event) => {
         event.preventDefault();
     };
 
-    const topFilms = [
-        { label: 'The Shawshank Redemption', id: 1, amount: 20 },
-        { label: 'The Godfather', id: 2, amount: 30 },
-        { label: 'The Godfather: Part II', id: 3, amount: 40 },
-        { label: 'The Dark Knight', id: 4, amount: 50 },
-        { label: '12 Angry Men', id: 5, amount: 20 },
-        { label: "Schindler's List", id: 6, amount: 30 },
-        { label: 'Pulp Fiction', id: 7, amount: 10 },
-        { label: 'The Lord of the Rings: The Return of the King', id: 8, amount: 20 }
-    ]
+    // useEffect hook for the Autocomplete component
+    useEffect(() => {
+        let active = true;
+        if (!loading) return undefined;
+
+        if (!options.length) {
+            getAllProducts()
+                .then(data => {
+                    if (active) setOptions([...data]);
+                })
+        }
+
+        return () => {
+            active = false;
+        };
+    }, [loading]);
+    // ---
 
     return (
         <Base>
@@ -87,21 +167,38 @@ export default function SellPage() {
                                                     <Autocomplete
                                                         id="combo-box-demo"
                                                         fullWidth
-                                                        clearOnBlur={true}
+                                                        open={open}
+                                                        onOpen={() => setOpen(true)}
+                                                        onClose={() => setOpen(false)}
+                                                        loading={loading}
+                                                        loadingText="Loading..."
+                                                        options={options}
                                                         disablePortal
-                                                        options={topFilms}
-                                                        disablePortal
-                                                        inputValue={selectedProduct ? selectedProduct.label : ''}
+                                                        getOptionLabel={(option) => option.name}
+                                                        inputValue={selectedProduct ? selectedProduct.name : ''}
                                                         isOptionEqualToValue={(option, value) => option.id === value.id}
                                                         onChange={(event, newValue) => setSelectedProduct(newValue)}
                                                         renderOption={(props, option) => {
                                                             return (
                                                                 <Box component="li" {...props}>
-                                                                    {option.label} | Amount in stock: {option.amount}
+                                                                    {option.name} | Amount in stock: {option.amount_in_stock}
                                                                 </Box>
                                                             )
                                                         }}
-                                                        renderInput={(params) => <TextField {...params} label="Product" name="product_label" />}
+                                                        renderInput={(params) => {
+                                                            return (
+                                                                <TextField {...params} label="Product" name="product_label"
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                        endAdornment: (
+                                                                            <Fragment>
+                                                                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                                                {params.InputProps.endAdornment}
+                                                                            </Fragment>
+                                                                        ),
+                                                                    }} />
+                                                            )
+                                                        }}
                                                     />
                                                 </Grid>
 
@@ -142,7 +239,11 @@ export default function SellPage() {
                                                 </Grid>
 
                                                 <Grid item xs={12}>
-                                                    {products && products}
+                                                    {cartProducts && cartProducts.map((el) => {
+                                                        return (
+                                                            <p key={el.product_id}>{el.product_id} | Amount: {el.amount}</p>
+                                                        )
+                                                    })}
                                                 </Grid>
                                             </Grid>
                                         </Box>

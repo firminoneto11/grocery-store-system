@@ -19,6 +19,10 @@ urlpatterns = [
 
     path(route='products/<str:name>', view=ProductsView.as_view({
         "get": "findAlikes"
+    })),
+
+    path(route="all_products/", view=ProductsView.as_view({
+        "get": "find_all_products"
     }))
 
 ]

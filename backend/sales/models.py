@@ -9,12 +9,16 @@ class Invoices(models.Model):
     gross_total = models.DecimalField(max_digits=8, decimal_places=2, blank=False, null=False)
     net_total = models.DecimalField(max_digits=8, decimal_places=2, blank=False, null=False)
 
+    # Optional Fields
+    customers_name = models.CharField(max_length=50, blank=True, null=False)
+    customers_cpf = models.CharField(max_length=14, blank=True, null=False)
+
     # Auto generated fields
     emitted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "INVOICES"
-        ordering = ("id", )
+        ordering = ("-emitted_at", )
 
 
 class Sales(models.Model):
@@ -28,16 +32,8 @@ class Sales(models.Model):
     product_id = models.ForeignKey(to=Products, related_name="product", on_delete=models.SET_NULL, blank=False, null=True,
         db_column="product_id")
 
-
     # Required Fields
     amount = models.IntegerField(null=False, blank=False)
-
-    # Optional fields
-    customers_name = models.CharField(max_length=50, blank=True, null=False)
-    customers_cpf = models.CharField(max_length=14, blank=True, null=False)
-
-    # Auto generated fields
-    purchase_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "SALES"

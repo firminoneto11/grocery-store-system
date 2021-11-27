@@ -9,7 +9,7 @@ from django.utils import timezone
 
 
 class SalesView(Gen):
-    
+
     queryset = Sales.objects.all()
     serializer_class = SalesSerializer
 
@@ -20,7 +20,7 @@ class SalesView(Gen):
     def create(self, req: Request):
 
         # Checking if the product id was informed. It will raise an exception in case it wasn't
-        if "sales" not in req.data.keys():
+        if "sales" not in req.data.keys() or len(req.data["sales"]) <= 0:
             raise ValidationError(detail={"detail": "List of sales was not informed"})
 
         try:
@@ -32,6 +32,8 @@ class SalesView(Gen):
             invoice.gross_total = 0
             invoice.taxes = 0
             invoice.net_total = 0
+            invoice.customers_name = "" if data.get("customers_name") is None else data.get("customers_name")
+            invoice.customers_cpf = "" if data.get("customers_cpf") is None else data.get("customers_cpf")
 
             # Binding the invoice_id field to the id of the just generated invoice
             for sale in data["sales"]:

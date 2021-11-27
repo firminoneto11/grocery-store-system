@@ -11,6 +11,8 @@ class InvoicesSerializer(ModelSerializer):
             "id": {"read_only": True},
             "taxes": {"read_only": True},
             "gross_total": {"read_only": True},
+            "customers_name": {"read_only": True},
+            "customers_cpf": {"read_only": True},
             "net_total": {"read_only": True},
             "emitted_at": {"read_only": True},
         }
@@ -21,9 +23,6 @@ class SalesSerializer(ModelSerializer):
     class Meta:
         model = Sales
         fields= "__all__"
-        extra_kwargs = {
-            "purchase_date": {"read_only": True}
-        }
 
     def validate_product_id(self, value):
         if not value:

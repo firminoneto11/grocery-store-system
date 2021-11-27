@@ -1,4 +1,5 @@
 from rest_framework.response import Response as res
+from rest_framework.request import Request
 from .models import Products
 from .serializers import ProductsSerializer
 from rest_framework.status import *
@@ -10,14 +11,22 @@ class ProductsView(Gen):
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
 
+    def find_all_products(self, _req):
+        """
+        This method is responsible for listing all the Products that are currently registered in the system without pagination.
+        """
+        queryset: Products = self.get_queryset().filter(is_active=True)
+        products: ProductsSerializer = self.get_serializer(instance=queryset, many=True)
+        return res(data=products.data)
+
     def list(self, _req):
         """
-        This method is responsible for listing all the Products that are currently registered in the system.
+        This method is responsible for listing all the Products that are currently registered in the system with pagination.
         """
         serializer = self.get_paginated_serializer()
         return self.get_paginated_response(data=serializer.data)
 
-    def create(self, req):
+    def create(self, req: Request):
         """
         This method is responsible for creating new products and save them in the database.
         """
