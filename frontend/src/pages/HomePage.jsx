@@ -17,7 +17,7 @@ export default function HomePage() {
 
     return (
         <Base>
-            <Box component="main" sx={{
+            <Box component="div" sx={{
                 backgroundColor: (theme) =>
                     theme.palette.mode === 'light'
                         ? theme.palette.grey[100]
@@ -27,7 +27,7 @@ export default function HomePage() {
                 overflow: 'auto',
             }}>
                 <Toolbar />
-                <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+                <Container maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
                     <Grid container spacing={3}>
                         {/* Chart */}
                         <Grid item xs={12} md={8} lg={9}>

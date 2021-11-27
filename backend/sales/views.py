@@ -5,6 +5,7 @@ from .models import Invoices, Sales
 from products.models import Products
 from .serializers import SalesSerializer, ValidationError
 from rest_framework.status import *
+from django.utils import timezone
 
 
 class SalesView(Gen):
@@ -18,7 +19,7 @@ class SalesView(Gen):
 
     def create(self, req: Request):
 
-        # Checking if the product id was informed. It will raise an exception in case it isn't
+        # Checking if the product id was informed. It will raise an exception in case it wasn't
         if "sales" not in req.data.keys():
             raise ValidationError(detail={"detail": "List of sales was not informed"})
 
@@ -95,14 +96,16 @@ class SalesView(Gen):
                 invoice.taxes += tax_total
                 invoice.net_total += net_total
 
-                # Appending the product of the current iteration to a list of products in order to be updated laterat once, making 
-                # sure that only one database transaction happens
+                # Setting the 'updated_at' to the current timestamp, because the bulk_update() method doesn't trigger a
+                # save signal in order to 'auto_now' work
+                cur_product.updated_at = timezone.now()
+
+                # Appending the product of the current iteration into a list of products in order to be updated later only once, 
+                # making sure that only one database transaction happens
                 products.append(cur_product)
 
             # Saving the product changes in the 'amount_in_stock' field
-            Products.objects.bulk_update(products, ["amount_in_stock"])
-
-            # TODO: Find a way to update the 'updated_at' field without the need of a trigger in the database;
+            Products.objects.bulk_update(products, ["amount_in_stock", "updated_at"])
 
             # Saving the new invoice
             invoice.save()
