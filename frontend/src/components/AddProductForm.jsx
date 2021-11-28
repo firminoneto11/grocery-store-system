@@ -78,7 +78,11 @@ export default function ProductForm({ close, updateGrid, setShouldReset }) {
         }
 
         // Preventing the user from creating products with numbers as name
-        if (!isNaN(newProduct.name)) {
+        if (newProduct.name === "") {
+            dispatchName({ type: "invalidName", text: "The product's name can't be blank." });
+            return;
+        }
+        else if (!isNaN(newProduct.name)) {
             dispatchName({ type: "invalidName", text: "The product's name can't be a number." });
             return;
         }

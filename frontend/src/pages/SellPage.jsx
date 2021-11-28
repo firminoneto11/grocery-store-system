@@ -12,9 +12,12 @@ import { useContext, useState, useEffect, Fragment } from 'react';
 // MUI imports
 import { Box } from '@mui/system';
 import {
-    Toolbar, Button, TextField, Grid, Paper, Container, Autocomplete, Tooltip, IconButton, CircularProgress
+    Toolbar, Button, TextField, Grid, Paper, Container, Autocomplete, Tooltip, IconButton, CircularProgress, Accordion,
+    AccordionSummary, AccordionDetails, Typography
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 export default function SellPage() {
 
@@ -75,36 +78,52 @@ export default function SellPage() {
 
     const addProduct = (event) => {
         event.preventDefault();
-        if (!selectedProduct) return alert("Select a product!");
-        else if (!event.target.amount.value) return alert("Set an amount!");
+        if (!selectedProduct) {
+            swal({
+                "title": "Pick a product",
+                "text": "Select a product!",
+                "icon": "info"
+            });
+            return;
+        }
+        else if (!event.target.amount.value) {
+            swal({
+                "title": "Set an amount",
+                "text": "Set an amount for this item",
+                "icon": "info"
+            });
+            return;
+        }
 
         const product = {
             product_id: selectedProduct.id,
+            name: selectedProduct.name,
+            unity_price: selectedProduct.unity_price,
             amount: event.target.amount.value
         };
 
         // Inserting the selected product into the cart
         setCartProducts((prevState) => {
             if (prevState.some(el => el.product_id === product.product_id)) {
-                alert("Product added already!");
+                swal({
+                    "title": "Can't add",
+                    "text": "Product added already!",
+                    "icon": "info"
+                });
                 return [...prevState];
             }
             else if (product.amount > selectedProduct.amount_in_stock) {
-                alert(
-                    `Can't buy ${product.amount}x of '${selectedProduct.name}' because it will exceed the amount in stock for this item.`
-                );
+                swal({
+                    "title": "Can't add",
+                    "text": `Can't add ${product.amount}x of '${selectedProduct.name}' because it will exceed the amount in stock for this item.`,
+                    "icon": "info"
+                });
                 return [...prevState];
             }
             else if (!prevState.length) {
-                // Resetting the states
-                // TODO: Find a way to remove the little 'X' icon after a insertion in the cart
-                setSelectedProduct('');
                 event.target.amount.value = "";
                 return [product];
             }
-            // Resetting the states
-            // TODO: Find a way to remove the little 'X' icon after a insertion in the cart
-            setSelectedProduct('');
             event.target.amount.value = "";
             return [product, ...prevState];
         })
@@ -122,7 +141,7 @@ export default function SellPage() {
         if (!options.length) {
             getAllProducts()
                 .then(data => {
-                    if (active) setOptions([...data]);
+                    if (active && data) setOptions([...data]);
                 })
         }
 
@@ -163,7 +182,8 @@ export default function SellPage() {
                                     }}>
                                         <Box sx={{ flexGrow: 1 }}>
                                             <Grid container spacing={1}>
-                                                <Grid item xs={6}>
+                                                <Grid item xs={12} lg={6}>
+                                                    {/* inputValue={selectedProduct ? selectedProduct.name : ''} */}
                                                     <Autocomplete
                                                         id="combo-box-demo"
                                                         fullWidth
@@ -175,7 +195,6 @@ export default function SellPage() {
                                                         options={options}
                                                         disablePortal
                                                         getOptionLabel={(option) => option.name}
-                                                        inputValue={selectedProduct ? selectedProduct.name : ''}
                                                         isOptionEqualToValue={(option, value) => option.id === value.id}
                                                         onChange={(event, newValue) => setSelectedProduct(newValue)}
                                                         renderOption={(props, option) => {
@@ -202,12 +221,12 @@ export default function SellPage() {
                                                     />
                                                 </Grid>
 
-                                                <Grid item xs={5}>
+                                                <Grid item xs={6} lg={5}>
                                                     <TextField name="amount" label="Amount" type="number" fullWidth />
                                                 </Grid>
 
-                                                <Grid item xs={1} sx={{ mt: "1rem" }}>
-                                                    <Tooltip title="Add this product">
+                                                <Grid item xs={6} lg={1} sx={{ mt: "1rem" }}>
+                                                    <Tooltip title="Add this product to the cart">
                                                         <IconButton type="submit">
                                                             <CheckIcon />
                                                         </IconButton>
@@ -241,7 +260,33 @@ export default function SellPage() {
                                                 <Grid item xs={12}>
                                                     {cartProducts && cartProducts.map((el) => {
                                                         return (
-                                                            <p key={el.product_id}>{el.product_id} | Amount: {el.amount}</p>
+                                                            <Accordion sx={{ mt: "0.5rem" }} key={el.product_id}>
+                                                                <AccordionSummary
+                                                                    expandIcon={<ExpandMoreIcon />}
+                                                                    aria-controls="panel1a-content"
+                                                                    id="panel1a-header">
+                                                                    <IconButton onClick={() => {
+                                                                        setCartProducts(prevState => {
+                                                                            const index = prevState.findIndex((ele) =>
+                                                                                ele.product_id === el.product_id)
+                                                                            prevState.splice(index, 1);
+                                                                            return [...prevState];
+                                                                        });
+                                                                    }}>
+                                                                        <Tooltip title="Remove this item from the cart">
+                                                                            <CancelIcon />
+                                                                        </Tooltip>
+                                                                    </IconButton>
+                                                                    <Typography sx={{ mt: "0.5rem" }}>{el.name}</Typography>
+                                                                </AccordionSummary>
+                                                                <AccordionDetails>
+                                                                    <Typography>
+                                                                        Product ID: {el.product_id} |
+                                                                        Amount bought: {el.amount} |
+                                                                        Total: R${Math.floor(el.amount * el.unity_price)}
+                                                                    </Typography>
+                                                                </AccordionDetails>
+                                                            </Accordion>
                                                         )
                                                     })}
                                                 </Grid>

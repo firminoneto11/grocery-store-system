@@ -1,0 +1,5 @@
+
+1 - Finish the implementation for the POST req on the 'sales' endpoint with the sale data collected from the sell form in the 
+submitHandler function;
+
+2 - 
