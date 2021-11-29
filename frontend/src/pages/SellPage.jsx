@@ -129,8 +129,77 @@ export default function SellPage() {
         })
     };
 
-    const submitHandler = (event) => {
+    const submitHandler = async (event) => {
         event.preventDefault();
+        const sellForm = event.target;
+        const sellData = {
+            customers_name: sellForm.customers_name.value,
+            customers_cpf: sellForm.customers_cpf.value,
+            sales: cartProducts.map(el => {
+                return { product_id: el.product_id, amount: el.amount }
+            })
+        };
+
+        if (!sellData.sales.length) {
+            swal({
+                "title": "Empty cart",
+                "icon": "error",
+                "text": "List of products is empty!"
+            });
+            return;
+        }
+
+        const url = "http://localhost:8000/api/v1/sales/";
+        let response;
+        try {
+            response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${tokens.access}`
+                },
+                body: JSON.stringify(sellData)
+            })
+        }
+        catch (error) {
+            swal({
+                "title": "Error",
+                "text": `Could not get a response from the server. More details about it:\n${error.message}`,
+                "icon": "error"
+            });
+            return;
+        }
+
+        const returnedData = await response.json();
+
+        if (response.status === 201) {
+            sellForm.customers_name.value = "";
+            sellForm.customers_cpf.value = "";
+            setCartProducts([]);
+            swal({
+                "title": "Success",
+                "text": "Sale registered successfully!",
+                "icon": "success"
+            });
+        }
+        else if (response.status === 401) {
+            logOut();
+        }
+        else {
+            let info = [];
+            for (let att in returnedData) {
+                let attName = att.split('_');
+                attName = attName.join(" ");
+                attName = toTitleCase(attName);
+                info.push(`${attName} - ${returnedData[att]}`);
+            }
+            info = info.join('\n');
+            swal({
+                "title": "Error",
+                "text": info,
+                "icon": "error"
+            });
+        }
     };
 
     // useEffect hook for the Autocomplete component
@@ -277,13 +346,15 @@ export default function SellPage() {
                                                                             <CancelIcon />
                                                                         </Tooltip>
                                                                     </IconButton>
-                                                                    <Typography sx={{ mt: "0.5rem" }}>{el.name}</Typography>
+                                                                    <Typography sx={{ mt: "0.5rem" }}>{el.name} |
+                                                                        Total: R${(el.amount * el.unity_price).toFixed(2)}</Typography>
                                                                 </AccordionSummary>
                                                                 <AccordionDetails>
                                                                     <Typography>
                                                                         Product ID: {el.product_id} |
                                                                         Amount bought: {el.amount} |
-                                                                        Total: R${Math.floor(el.amount * el.unity_price)}
+                                                                        Total: R${(el.amount * el.unity_price).toFixed(2)} |
+                                                                        Unity price: R${(el.unity_price * 1).toFixed(2)}
                                                                     </Typography>
                                                                 </AccordionDetails>
                                                             </Accordion>

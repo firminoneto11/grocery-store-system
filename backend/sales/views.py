@@ -40,7 +40,7 @@ class SalesView(Gen):
                 sale: dict
                 # Selecting the product for the current iteration and the amount it was bought
                 cur_product: Products = Products.objects.get(pk=int(sale.get("product_id")))
-                amount_bought = sale.get("amount")
+                amount_bought = int(sale.get("amount"))
 
                 # Checking if the Product wasn't already in the products list
                 if cur_product in products:
@@ -124,4 +124,4 @@ class SalesView(Gen):
         else:
             sales.is_valid(raise_exception=True)
             sales.save()
-            return res(status=HTTP_200_OK)
+            return res(data={"detail": "Sale registered successfully!"}, status=HTTP_201_CREATED)
