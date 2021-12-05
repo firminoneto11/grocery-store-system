@@ -5,6 +5,7 @@ import Base from '../components/Base';
 import AuthContext from '../context/AuthContext';
 import swal from 'sweetalert';
 import { toTitleCase } from '../utils/toTitleCase';
+import Copyright from '../components/Copyright';
 
 // React imports
 import { useContext, useState, useEffect, Fragment } from 'react';
@@ -370,6 +371,7 @@ export default function SellPage() {
                             </Paper>
                         </Grid>
                     </Grid>
+                    <Copyright sx={{ mt: 5 }} />
                 </Container>
             </Box>
         </Base >
