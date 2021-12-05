@@ -6,6 +6,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../components/Title';
+import { useHistory } from 'react-router';
 
 // Generate Order Data
 function createData(id, date, name, shipTo, paymentMethod, amount) {
@@ -48,11 +49,15 @@ const rows = [
     ),
 ];
 
-function preventDefault(event) {
-    event.preventDefault();
-}
-
 export default function Orders() {
+
+    const history = useHistory();
+
+    const goToOrders = (event) => {
+        event.preventDefault();
+        history.push("/orders");
+    };
+
     return (
         <React.Fragment>
             <Title>Recent Orders</Title>
@@ -78,7 +83,7 @@ export default function Orders() {
                     ))}
                 </TableBody>
             </Table>
-            <Link color="primary" href="#" onClick={preventDefault} sx={{ mt: 3 }}>
+            <Link color="primary" onClick={goToOrders} sx={{ mt: 3, cursor: "pointer" }}>
                 See more orders
             </Link>
         </React.Fragment>

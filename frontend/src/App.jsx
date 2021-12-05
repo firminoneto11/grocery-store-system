@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import SellPage from "./pages/SellPage";
+import OrdersPage from "./pages/OrdersPage";
 
 export default function App() {
     return (
@@ -14,6 +15,7 @@ export default function App() {
                 <PrivateRoute component={HomePage} path="/" exact />
                 <PrivateRoute component={ProductsPage} path="/products" exact />
                 <PrivateRoute component={SellPage} path="/sell" exact />
+                <PrivateRoute component={OrdersPage} path="/orders" exact />
                 <Route component={LoginPage} path="/login" exact />
             </AuthProvider>
         </Browser>

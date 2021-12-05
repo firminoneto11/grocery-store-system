@@ -61,6 +61,10 @@ export default function Base({ children }) {
         history.push("/sell");
     }
 
+    const goToOrders = () => {
+        history.push("/orders");
+    }
+
     useEffect(() => {
         if (isSmall && !isBig) setOpen(false);
         else if (isBig && !isSmall) setOpen(true);
@@ -121,7 +125,7 @@ export default function Base({ children }) {
                         </ListItem>
 
                         {/* Orders Page button */}
-                        <ListItem button>
+                        <ListItem button onClick={goToOrders}>
                             <ListItemIcon>
                                 <BarChartIcon />
                             </ListItemIcon>
