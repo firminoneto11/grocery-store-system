@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from utils import Gen
 from .models import Invoices, Sales
 from products.models import Products
-from .serializers import SalesSerializer, ValidationError
+from .serializers import SalesSerializer, ValidationError, InvoicesSerializer
 from rest_framework.status import *
 from django.utils import timezone
 
@@ -13,7 +13,22 @@ class SalesView(Gen):
     queryset = Sales.objects.all()
     serializer_class = SalesSerializer
 
-    def list(self, _req):
+    def list(self, req: Request):
+        # Checking if in the query params there is a 'latest_five' param set with a "true" value
+        if req.query_params.get("latest_five") == "true":
+
+            # Selecting the data from the database
+            queryset: Invoices = Invoices.objects.values("id", "emitted_at", "gross_total", "net_total").order_by("-emitted_at")[:5]
+
+            # If the amount is 0, returns a 404 status code
+            if queryset.count() == 0:
+                return res(data={"detail": "There are no sales yet to show"}, status=404)
+
+            # Serializing the data and returning a response
+            invoices: InvoicesSerializer = InvoicesSerializer(instance=queryset, many=True)
+            return res(data=invoices.data)
+
+        # Serializing the data and returning a paginated response
         sales: SalesSerializer = self.get_paginated_serializer()
         return self.get_paginated_response(data=sales.data)
 

@@ -1,91 +1,129 @@
-import * as React from 'react';
-import Link from '@mui/material/Link';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Title from '../components/Title';
+
+// React imports
+import { Fragment, useEffect, useState, useContext } from 'react';
 import { useHistory } from 'react-router';
 
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-    return { id, date, name, shipTo, paymentMethod, amount };
-}
+// Custom components import
+import Title from '../components/Title';
+import AuthContext from '../context/AuthContext';
 
-const rows = [
-    createData(
-        0,
-        '16 Mar, 2019',
-        'Elvis Presley',
-        'Tupelo, MS',
-        'VISA ⠀•••• 3719',
-        312.44,
-    ),
-    createData(
-        1,
-        '16 Mar, 2019',
-        'Paul McCartney',
-        'London, UK',
-        'VISA ⠀•••• 2574',
-        866.99,
-    ),
-    createData(2, '16 Mar, 2019', 'Tom Scholz', 'Boston, MA', 'MC ⠀•••• 1253', 100.81),
-    createData(
-        3,
-        '16 Mar, 2019',
-        'Michael Jackson',
-        'Gary, IN',
-        'AMEX ⠀•••• 2000',
-        654.39,
-    ),
-    createData(
-        4,
-        '15 Mar, 2019',
-        'Bruce Springsteen',
-        'Long Branch, NJ',
-        'VISA ⠀•••• 5919',
-        212.79,
-    ),
-];
+// Sweetalert
+import swal from 'sweetalert';
+
+// MUI imports
+import {
+    CircularProgress, Box, Link, Table, TableBody, TableCell, TableHead, TableRow
+} from "@mui/material";
 
 export default function Orders() {
 
+    // Declaring some states
+    const [ordersData, setOrdersData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [noDataMesage, setNoDataMesage] = useState(false);
+
+    // Getting some context data
+    const { tokens, logOut } = useContext(AuthContext);
+
+    // useHistory hook
     const history = useHistory();
 
+    // Fired when the user clicks on the link bellow the table. Pushes the user to the /orders url
     const goToOrders = (event) => {
         event.preventDefault();
         history.push("/orders");
     };
 
+    // Function that fetches the latest 5 recent orders
+    const getRecentOrders = async () => {
+        setLoading(true);
+        const url = "http://localhost:8000/api/v1/sales/?latest_five=true";
+        let response;
+
+        try {
+            response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${tokens.access}`
+                }
+            });
+        }
+        catch (error) {
+            setLoading(false);
+            swal({
+                "title": "Error",
+                "text": `Could not get a response from the server. More details about it:\n${error.message}`,
+                "icon": "error"
+            });
+            return;
+        }
+
+        const returnedData = await response.json();
+        if (response.status === 200) {
+            setOrdersData(returnedData);
+        }
+        else if (response.status == 404) {
+            setNoDataMesage(returnedData.detail);
+        }
+        else if (response.status === 401) {
+            logOut();
+        }
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        getRecentOrders();
+    }, []);
+
     return (
-        <React.Fragment>
-            <Title>Recent Orders</Title>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Ship To</TableCell>
-                        <TableCell>Payment Method</TableCell>
-                        <TableCell align="right">Sale Amount</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {rows.map((row) => (
-                        <TableRow key={row.id}>
-                            <TableCell>{row.date}</TableCell>
-                            <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.shipTo}</TableCell>
-                            <TableCell>{row.paymentMethod}</TableCell>
-                            <TableCell align="right">{`$${row.amount}`}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            <Link color="primary" onClick={goToOrders} sx={{ mt: 3, cursor: "pointer" }}>
-                See more orders
-            </Link>
-        </React.Fragment>
+        <Fragment>
+
+            {/* Rendered when a fetch call is made */}
+            {loading && (
+                <Box sx={{ textAlign: "center" }}>
+                    <CircularProgress />
+                </Box>
+            )}
+
+            {/* Rendered after a succesfull fetch call */}
+            {ordersData && (
+                <Fragment>
+                    <Title>Recent Orders</Title>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Order ID</TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Gross Total</TableCell>
+                                <TableCell>Net Total</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {ordersData.map((order) => (
+                                <TableRow key={order.id}>
+                                    <TableCell>{order.id}</TableCell>
+                                    <TableCell>
+                                        {new Date(order.emitted_at).toLocaleDateString()}
+                                        &nbsp;at&nbsp;
+                                        {new Date(order.emitted_at).toLocaleTimeString()}
+                                    </TableCell>
+                                    <TableCell>R${order.gross_total}</TableCell>
+                                    <TableCell>R${order.net_total}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+
+                    {/* Link to go to the orders page */}
+                    <Link color="primary" onClick={goToOrders} sx={{ mt: 3, cursor: "pointer" }}>
+                        See more orders
+                    </Link>
+                </Fragment>
+            )}
+
+            {/* Rendered when the fetch call was made but returned a 404 status */}
+            {!ordersData && !loading && (<Title>{noDataMesage}</Title>)}
+        </Fragment>
     );
 }
