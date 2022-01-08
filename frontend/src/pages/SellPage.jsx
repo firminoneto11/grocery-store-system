@@ -6,6 +6,7 @@ import AuthContext from '../context/AuthContext';
 import swal from 'sweetalert';
 import { toTitleCase } from '../utils/toTitleCase';
 import Copyright from '../components/Copyright';
+import { cpfMask } from '../utils/cpfMask';
 
 // React imports
 import { useContext, useState, useEffect, Fragment } from 'react';
@@ -30,6 +31,11 @@ export default function SellPage() {
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
     const loading = open && options.length === 0;
+
+    // Function to apply a mask in the CPF field
+    const maskCpf = (event) => {
+        event.target.value = cpfMask(event.target.value);
+    }
 
     const getAllProducts = async () => {
         const url = "http://localhost:8000/api/v1/all_products/";
@@ -324,7 +330,7 @@ export default function SellPage() {
                                                 </Grid>
 
                                                 <Grid item xs={12}>
-                                                    <TextField fullWidth name="customers_cpf" label="Customer's cpf" />
+                                                    <TextField type={'text'} fullWidth name="customers_cpf" label="Customer's cpf" inputProps={{ maxLength: "14" }} onChange={maskCpf} />
                                                 </Grid>
 
                                                 <Grid item xs={12}>
