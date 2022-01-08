@@ -110,8 +110,7 @@ export const AuthProvider = ({ children }) => {
             response = await fetch("http://localhost:8000/api/v1/token/refresh/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                // body: JSON.stringify({ refresh: tokens.refresh })
-                body: JSON.stringify(tokens.refresh)  // TODO: Comentar essa linha e descomentar a de cima
+                body: JSON.stringify({ refresh: tokens.refresh })
             })
         }
         catch (error) {
@@ -135,17 +134,13 @@ export const AuthProvider = ({ children }) => {
     const accessTokenIsValid = () => {
         if (user) {
             const expiresAt = user.exp * 1000;  // Time in ms
-            const curDate = new Date().getTime() * 1000  // Time in ms
+            const curDate = new Date().getTime()  // Time in ms
             const milisecondsInADay = 86400000;  // Time in ms
 
-            if (curDate >= expiresAt - milisecondsInADay) {
-                console.log(curDate);
-                console.log(expiresAt - milisecondsInADay);
-                // TODO: O useEffect tá trigando 2x essa função
-                // TODO: A checagem não está ocorrendo da forma certa
+            if (curDate >= expiresAt) {
                 return false;
             }
-            else if (curDate >= expiresAt) {
+            else if (curDate >= expiresAt - milisecondsInADay) {
                 return false;
             }
 
@@ -164,7 +159,6 @@ export const AuthProvider = ({ children }) => {
                 return () => clearInterval(interval);
             }
             else {
-                console.log(accessTokenIsValid());
                 updateTokens();
             }
         }
