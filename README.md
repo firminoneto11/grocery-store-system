@@ -47,6 +47,7 @@ Accordingly to the propsed functionalities, the following screens should be impl
 -   [x] Edit product screen
 -   [x] Delete product screen
 -   [x] Sales consolidation screen
+-   [ ] Sales listing screen
 
 ---
 
